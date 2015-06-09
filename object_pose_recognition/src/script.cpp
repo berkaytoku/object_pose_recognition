@@ -54,7 +54,7 @@ int main() {
 			}
 			tag = 1;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -80,7 +80,7 @@ int main() {
 			}
 			tag = 2;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -106,7 +106,7 @@ int main() {
 			}
 			tag = 3;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -132,7 +132,7 @@ int main() {
 			}
 			tag = 4;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -158,7 +158,7 @@ int main() {
 			}
 			tag = 5;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -184,7 +184,7 @@ int main() {
 			}
 			tag = 6;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -210,7 +210,7 @@ int main() {
 			}
 			tag = 7;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -236,7 +236,7 @@ int main() {
 			}
 			tag = 8;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -262,7 +262,7 @@ int main() {
 			}
 			tag = 9;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -288,7 +288,7 @@ int main() {
 			}
 			tag = 10;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -314,7 +314,7 @@ int main() {
 			}
 			tag = 11;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -340,7 +340,7 @@ int main() {
 			}
 			tag = 12;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -366,7 +366,7 @@ int main() {
 			}
 			tag = 13;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -392,7 +392,7 @@ int main() {
 			}
 			tag = 14;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 		
@@ -418,7 +418,7 @@ int main() {
 			}
 			tag = 15;
 			
-			output = firstOutput + " " + secondOutput + " " + thirdOutput + " " + static_cast<ostringstream*>( &(ostringstream() << tag) )->str() + "\n";
+			output = firstOutput + " " + secondOutput + " " + thirdOutput + "\n";
 			outputFile<<output;
 		}
 	}
