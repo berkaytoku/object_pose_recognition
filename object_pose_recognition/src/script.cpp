@@ -8,21 +8,23 @@
 
 using namespace std;
 
-string class1 = "../data/OPR-Dataset/class1/data/";
-string class2 = "../data/OPR-Dataset/class2/data/";
-string class3 = "../data/OPR-Dataset/class3/data/";
-string class4 = "../data/OPR-Dataset/class4/data/";
-string class5 = "../data/OPR-Dataset/class5/data/";
-string class6 = "../data/OPR-Dataset/class6/data/";
-string class7 = "../data/OPR-Dataset/class7/data/";
-string class8 = "../data/OPR-Dataset/class8/data/";
-string class9 = "../data/OPR-Dataset/class9/data/";
-string class10 = "../data/OPR-Dataset/class10/data/";
-string class11 = "../data/OPR-Dataset/class11/data/";
-string class12 = "../data/OPR-Dataset/class12/data/";
-string class13 = "../data/OPR-Dataset/class13/data/";
-string class14 = "../data/OPR-Dataset/class14/data/";
-string class15 = "../data/OPR-Dataset/class15/data/"; 
+string class1 = "./object_pose_recognition/data/OPR-Dataset/class1/data/";
+string class2 = "./object_pose_recognition/data/OPR-Dataset/class2/data/";
+string class3 = "./object_pose_recognition/data/OPR-Dataset/class3/data/";
+string class4 = "./object_pose_recognition/data/OPR-Dataset/class4/data/";
+string class5 = "./object_pose_recognition/data/OPR-Dataset/class5/data/";
+string class6 = "./object_pose_recognition/data/OPR-Dataset/class6/data/";
+string class7 = "./object_pose_recognition/data/OPR-Dataset/class7/data/";
+string class8 = "./object_pose_recognition/data/OPR-Dataset/class8/data/";
+string class9 = "./object_pose_recognition/data/OPR-Dataset/class9/data/";
+string class10 = "./object_pose_recognition/data/OPR-Dataset/class10/data/";
+string class11 = "./object_pose_recognition/data/OPR-Dataset/class11/data/";
+string class12 = "./object_pose_recognition/data/OPR-Dataset/class12/data/";
+string class13 = "./object_pose_recognition/data/OPR-Dataset/class13/data/";
+string class14 = "./object_pose_recognition/data/OPR-Dataset/class14/data/";
+string class15 = "./object_pose_recognition/data/OPR-Dataset/class15/data/"; 
+
+string thirdOutputBeginningPath = "./object_pose_recognition/data/OPR-Dataset/class";
 
 int main() {
 	//srand ( time(NULL) );
@@ -42,7 +44,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 1;
@@ -50,7 +52,7 @@ int main() {
 				while(sampleRand==i || sampleRand == i+1){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 1;
 			
@@ -68,7 +70,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 2;
@@ -76,7 +78,7 @@ int main() {
 				while(sampleRand==i-1000 || sampleRand == i+1-1000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 2;
 			
@@ -94,7 +96,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 3;
@@ -102,7 +104,7 @@ int main() {
 				while(sampleRand==i-2000 || sampleRand == i+1-2000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 3;
 			
@@ -120,7 +122,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 4;
@@ -146,7 +148,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 5;
@@ -154,7 +156,7 @@ int main() {
 				while(sampleRand==i-4000 || sampleRand == i+1-4000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 5;
 			
@@ -172,7 +174,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 6;
@@ -180,7 +182,7 @@ int main() {
 				while(sampleRand==i-5000 || sampleRand == i+1-5000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 6;
 			
@@ -198,7 +200,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 7;
@@ -206,7 +208,7 @@ int main() {
 				while(sampleRand==i-6000 || sampleRand == i+1-6000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 7;
 			
@@ -224,7 +226,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 8;
@@ -232,7 +234,7 @@ int main() {
 				while(sampleRand==i-7000 || sampleRand == i+1-7000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 8;
 			
@@ -250,7 +252,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 9;
@@ -258,7 +260,7 @@ int main() {
 				while(sampleRand==i-8000 || sampleRand == i+1-8000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 9;
 			
@@ -276,7 +278,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 10;
@@ -284,7 +286,7 @@ int main() {
 				while(sampleRand==i-9000 || sampleRand == i+1-9000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 10;
 			
@@ -302,7 +304,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 11;
@@ -310,7 +312,7 @@ int main() {
 				while(sampleRand==i-10000 || sampleRand == i+1-10000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 11;
 			
@@ -328,7 +330,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 12;
@@ -336,7 +338,7 @@ int main() {
 				while(sampleRand==i-11000 || sampleRand == i+1-11000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 12;
 			
@@ -354,7 +356,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 13;
@@ -362,7 +364,7 @@ int main() {
 				while(sampleRand==i-12000 || sampleRand == i+1-12000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 13;
 			
@@ -380,7 +382,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 14;
@@ -388,7 +390,7 @@ int main() {
 				while(sampleRand==i-13000 || sampleRand == i+1-13000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 14;
 			
@@ -406,7 +408,7 @@ int main() {
 					classRand = (rand()%15) + 1;
 				}
 				int sampleRand = rand()%1000;
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			else{
 				classRand = 15;
@@ -414,7 +416,7 @@ int main() {
 				while(sampleRand==i-14000 || sampleRand == i+1-14000){
 					sampleRand = rand()%1000;
 				}
-				thirdOutput = "../data/OPR-Dataset/class" + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
+				thirdOutput = thirdOutputBeginningPath + static_cast<ostringstream*>( &(ostringstream() << classRand) )->str() + "/data/" + "color" + static_cast<ostringstream*>( &(ostringstream() << sampleRand) )->str() + ".jpg";
 			}
 			tag = 15;
 			
