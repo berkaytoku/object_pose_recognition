@@ -65,6 +65,8 @@ models/*
 *.binaryproto
 *leveldb
 *lmdb
+object_pose_recognition/data/OPR-Dataset/*
+
 
 # build, distribute, and bins (+ python proto bindings)
 build
