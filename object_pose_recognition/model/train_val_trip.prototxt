@@ -2,9 +2,7 @@ name: "ObjectPoseRecognitionCNN"
 layer {
   name: "data"
   type: "TripleImageData"
-  top: "data_a"
-  top: "data_b"
-  top: "data_c"
+  top: "data"
   image_data_param {
  	source: "./object_pose_recognition/data/file_list.txt"
     batch_size: 64
@@ -14,6 +12,19 @@ layer {
   #transform_param {
   #  mean_file: "./examples/cifar10/mean.binaryproto"
   #}
+}
+layer {
+    name: "slicer_label"
+    type: "Slice"
+    bottom: "data"
+    top: "data_a"
+    top: "data_b"
+    top: "data_c"
+    slice_param {
+        axis: 1
+        slice_point: 3
+        slice_point: 6
+    }
 }
 layer{
 	name: "conv1_a"

@@ -257,14 +257,14 @@ class TripleImageDataLayer : public BasePrefetchingDataLayer<Dtype> {
      
      virtual inline const char* type() const { return "TripleImageData"; }
      virtual inline int ExactNumBottomBlobs() const { return 0; }
-     virtual inline int ExactNumTopBlobs() const { return 3; }
+     virtual inline int ExactNumTopBlobs() const { return 1; }
      
  protected:
      shared_ptr<Caffe::RNG> prefetch_rng_;
      virtual void ShuffleImages();
      virtual void InternalThreadEntry();
      
-     vector<std::pair<std::string, int> > lines_;
+     vector<vector<std::string> > lines_;
      int lines_id_;
 };
 

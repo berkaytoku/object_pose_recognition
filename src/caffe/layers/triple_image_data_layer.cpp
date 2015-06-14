@@ -37,10 +37,15 @@ void TripleImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bot
   const string& source = this->layer_param_.image_data_param().source();
   LOG(INFO) << "Opening file " << source;
   std::ifstream infile(source.c_str());
-  string filename;
-  int label;
-  while (infile >> filename >> label) {
-    lines_.push_back(std::make_pair(filename, label));
+  string filename_a;
+  string filename_b;
+  string filename_c;
+  while (infile >> filename_a >> filename_b >> filename_c) {
+      std::vector<std::string> vec = std::vector<std::string>();
+      vec.push_back(filename_a);
+      vec.push_back(filename_b);
+      vec.push_back(filename_c);
+      lines_.push_back(vec);
   }
 
   if (this->layer_param_.image_data_param().shuffle()) {
@@ -62,7 +67,7 @@ void TripleImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bot
     lines_id_ = skip;
   }
   // Read an image, and use it to initialize the top blob.
-  cv::Mat cv_img = ReadImageToCVMat(root_folder + lines_[lines_id_].first,
+  cv::Mat cv_img = ReadImageToCVMat(root_folder + lines_[lines_id_].at(0),
                                     new_height, new_width, is_color);
   // Use data_transformer to infer the expected blob shape from a cv_image.
   vector<int> top_shape = this->data_transformer_->InferBlobShape(cv_img);
@@ -70,16 +75,18 @@ void TripleImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bot
   // Reshape prefetch_data and top[0] according to the batch_size.
   const int batch_size = this->layer_param_.image_data_param().batch_size();
   top_shape[0] = batch_size;
+  top_shape[1] = top_shape[1] * 3;
   this->prefetch_data_.Reshape(top_shape);
   top[0]->ReshapeLike(this->prefetch_data_);
+  //top[1]->ReshapeLike(this->prefetch_data_);
+  //top[2]->ReshapeLike(this->prefetch_data_);
 
   LOG(INFO) << "output data size: " << top[0]->num() << ","
       << top[0]->channels() << "," << top[0]->height() << ","
       << top[0]->width();
   // label
   //vector<int> label_shape(1, batch_size);
-  top[1]->ReshapeLike(this->prefetch_data_);
-  top[2]->ReshapeLike(this->prefetch_data_);
+
   //this->prefetch_label_.Reshape(label_shape);
 }
 
@@ -109,13 +116,14 @@ void TripleImageDataLayer<Dtype>::InternalThreadEntry() {
 
   // Reshape according to the first image of each batch
   // on single input batches allows for inputs of varying dimension.
-  cv::Mat cv_img = ReadImageToCVMat(root_folder + lines_[lines_id_].first,
+  cv::Mat cv_img = ReadImageToCVMat(root_folder + lines_[lines_id_].at(0),
       new_height, new_width, is_color);
   // Use data_transformer to infer the expected blob shape from a cv_img.
   vector<int> top_shape = this->data_transformer_->InferBlobShape(cv_img);
   this->transformed_data_.Reshape(top_shape);
   // Reshape prefetch_data according to the batch_size.
   top_shape[0] = batch_size;
+  top_shape[1] = top_shape[1] * 3;
   this->prefetch_data_.Reshape(top_shape);
 
   Dtype* prefetch_data = this->prefetch_data_.mutable_cpu_data();
@@ -124,31 +132,34 @@ void TripleImageDataLayer<Dtype>::InternalThreadEntry() {
   // datum scales
   const int lines_size = lines_.size();
   for (int item_id = 0; item_id < batch_size; ++item_id) {
-    // get a blob
-    timer.Start();
-    CHECK_GT(lines_size, lines_id_);
-    cv::Mat cv_img = ReadImageToCVMat(root_folder + lines_[lines_id_].first,
-        new_height, new_width, is_color);
-    CHECK(cv_img.data) << "Could not load " << lines_[lines_id_].first;
-    read_time += timer.MicroSeconds();
-    timer.Start();
-    // Apply transformations (mirror, crop...) to the image
-    int offset = this->prefetch_data_.offset(item_id);
-    this->transformed_data_.set_cpu_data(prefetch_data + offset);
-    this->data_transformer_->Transform(cv_img, &(this->transformed_data_));
-    trans_time += timer.MicroSeconds();
-
-    //prefetch_label[item_id] = lines_[lines_id_].second;
-    // go to the next iter
-    lines_id_++;
-    if (lines_id_ >= lines_size) {
-      // We have reached the end. Restart from the first.
-      DLOG(INFO) << "Restarting data prefetching from start.";
-      lines_id_ = 0;
-      if (this->layer_param_.image_data_param().shuffle()) {
-        ShuffleImages();
+      for (int i=0; i < 3; i++) {
+          // get a blob
+          timer.Start();
+          CHECK_GT(lines_size, lines_id_);
+          cv::Mat cv_img = ReadImageToCVMat(root_folder + lines_[lines_id_].at(i),
+                                            new_height, new_width, is_color);
+          CHECK(cv_img.data) << "Could not load " << lines_[lines_id_].at(i);
+          read_time += timer.MicroSeconds();
+          timer.Start();
+          // Apply transformations (mirror, crop...) to the image
+          int offset = this->prefetch_data_.offset(item_id);
+          int imgOffset = this->transformed_data_.count();
+          this->transformed_data_.set_cpu_data(prefetch_data + offset + imgOffset*i);
+          this->data_transformer_->Transform(cv_img, &(this->transformed_data_));
+          trans_time += timer.MicroSeconds();
+          
+          //prefetch_label[item_id] = lines_[lines_id_].second;
+          // go to the next iter
+          lines_id_++;
+          if (lines_id_ >= lines_size) {
+              // We have reached the end. Restart from the first.
+              DLOG(INFO) << "Restarting data prefetching from start.";
+              lines_id_ = 0;
+              if (this->layer_param_.image_data_param().shuffle()) {
+                  ShuffleImages();
+              }
+          }
       }
-    }
   }
   batch_timer.Stop();
   DLOG(INFO) << "Prefetch batch: " << batch_timer.MilliSeconds() << " ms.";
