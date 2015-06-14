@@ -1,0 +1,310 @@
+name: "ObjectPoseRecognitionCNN"
+layer {
+  name: "data"
+  type: "TripleImageData"
+  top: "data_a"
+  top: "data_b"
+  top: "data_c"
+  image_data_param {
+ 	source: "./object_pose_recognition/data/file_list.txt"
+    batch_size: 64
+    new_height: 64
+    new_width: 64
+  }
+  #transform_param {
+  #  mean_file: "./examples/cifar10/mean.binaryproto"
+  #}
+}
+layer{
+	name: "conv1_a"
+	type: "Convolution"
+	bottom: "data_a"
+	top: "conv1_a"
+    param {
+        name: "conv1_w"
+        lr_mult: 1
+    }
+    param {
+        name: "conv1_r"
+        lr_mult: 2
+    }
+	convolution_param {
+		num_output: 16
+		kernel_size: 8
+		stride: 2
+	}
+}
+layer{
+	name: "relu1_a"
+	type: "ReLU"
+	bottom: "conv1_a"
+	top: "conv1_a"
+}
+layer{
+	name: "pool1_a"
+	type: "Pooling"
+	bottom: "conv1_a"
+	top: "pool1_a"
+	pooling_param {
+		pool: MAX
+		kernel_size: 2
+	}	
+}
+layer{
+	name: "conv2_a"
+	type: "Convolution"
+	bottom: "pool1_a"
+	top: "conv2_a"
+    param {
+        name: "conv2_w"
+        lr_mult: 1
+    }
+    param {
+        name: "conv2_r"
+        lr_mult: 2
+    }
+	convolution_param {
+		num_output: 7
+		kernel_size: 5
+		pad: 1
+		stride: 2
+	}
+}
+layer{
+	name: "relu2_a"
+	type: "ReLU"
+	bottom: "conv2_a"
+	top: "conv2_a"
+}
+layer{
+	name: "pool2_a"
+	type: "Pooling"
+	bottom: "conv2_a"
+	top: "pool2_a"
+	pooling_param {
+		pool: MAX
+		kernel_size: 2
+	}	
+}
+layer{
+	name: "ip3_a"
+	type: "InnerProduct"
+	bottom: "pool2_a"
+	top: "ip3_a"
+	inner_product_param {
+		num_output: 256
+	}
+}
+layer{
+	name: "relu3_a"
+	type: "ReLU"
+	bottom: "ip3_a"
+	top: "ip3_a"
+}
+layer{
+	name: "ip4_a"
+	type: "InnerProduct"
+	bottom: "ip3_a"
+	top: "ip4_a"
+	inner_product_param {
+		num_output: 256 # descriptor size ?
+	}
+}
+layer{
+    name: "conv1_b"
+    type: "Convolution"
+    bottom: "data_b"
+    top: "conv1_b"
+    param {
+        name: "conv1_w"
+        lr_mult: 1
+    }
+    param {
+        name: "conv1_r"
+        lr_mult: 2
+    }
+    convolution_param {
+        num_output: 16
+        kernel_size: 8
+        stride: 2
+    }
+}
+layer{
+    name: "relu1_b"
+    type: "ReLU"
+    bottom: "conv1_b"
+    top: "conv1_b"
+}
+layer{
+    name: "pool1_b"
+    type: "Pooling"
+    bottom: "conv1_b"
+    top: "pool1_b"
+    pooling_param {
+        pool: MAX
+        kernel_size: 2
+    }
+}
+layer{
+    name: "conv2_b"
+    type: "Convolution"
+    bottom: "pool1_b"
+    top: "conv2_b"
+    param {
+        name: "conv2_w"
+        lr_mult: 1
+    }
+    param {
+        name: "conv2_r"
+        lr_mult: 2
+    }
+    convolution_param {
+        num_output: 7
+        kernel_size: 5
+        pad: 1
+        stride: 2
+    }
+}
+layer{
+    name: "relu2_b"
+    type: "ReLU"
+    bottom: "conv2_b"
+    top: "conv2_b"
+}
+layer{
+    name: "pool2_b"
+    type: "Pooling"
+    bottom: "conv2_b"
+    top: "pool2_b"
+    pooling_param {
+        pool: MAX
+        kernel_size: 2
+    }
+}
+layer{
+    name: "ip3_b"
+    type: "InnerProduct"
+    bottom: "pool2_b"
+    top: "ip3_b"
+    inner_product_param {
+        num_output: 256
+    }
+}
+layer{
+    name: "relu3_b"
+    type: "ReLU"
+    bottom: "ip3_b"
+    top: "ip3_b"
+}
+layer{
+    name: "ip4_b"
+    type: "InnerProduct"
+    bottom: "ip3_b"
+    top: "ip4_b"
+    inner_product_param {
+        num_output: 256 # descriptor size ?
+    }
+}
+layer{
+    name: "conv1_c"
+    type: "Convolution"
+    bottom: "data_c"
+    top: "conv1_c"
+    param {
+        name: "conv1_w"
+        lr_mult: 1
+    }
+    param {
+        name: "conv1_r"
+        lr_mult: 2
+    }
+    convolution_param {
+        num_output: 16
+        kernel_size: 8
+        stride: 2
+    }
+}
+layer{
+    name: "relu1_c"
+    type: "ReLU"
+    bottom: "conv1_c"
+    top: "conv1_c"
+}
+layer{
+    name: "pool1_c"
+    type: "Pooling"
+    bottom: "conv1_c"
+    top: "pool1_c"
+    pooling_param {
+        pool: MAX
+        kernel_size: 2
+    }
+}
+layer{
+    name: "conv2_c"
+    type: "Convolution"
+    bottom: "pool1_c"
+    top: "conv2_c"
+    param {
+        name: "conv2_w"
+        lr_mult: 1
+    }
+    param {
+        name: "conv2_r"
+        lr_mult: 2
+    }
+    convolution_param {
+        num_output: 7
+        kernel_size: 5
+        pad: 1
+        stride: 2
+    }
+}
+layer{
+    name: "relu2_c"
+    type: "ReLU"
+    bottom: "conv2_c"
+    top: "conv2_c"
+}
+layer{
+    name: "pool2_c"
+    type: "Pooling"
+    bottom: "conv2_c"
+    top: "pool2_c"
+    pooling_param {
+        pool: MAX
+        kernel_size: 2
+    }
+}
+layer{
+    name: "ip3_c"
+    type: "InnerProduct"
+    bottom: "pool2_c"
+    top: "ip3_c"
+    inner_product_param {
+        num_output: 256
+    }
+}
+layer{
+    name: "relu3_c"
+    type: "ReLU"
+    bottom: "ip3_c"
+    top: "ip3_c"
+}
+layer{
+    name: "ip4_c"
+    type: "InnerProduct"
+    bottom: "ip3_c"
+    top: "ip4_c"
+    inner_product_param {
+        num_output: 256 # descriptor size ?
+    }
+}
+layer {
+	name: "loss"
+	type: "TripleEuclideanLoss"
+	bottom: "ip4_a"
+	bottom: "ip4_b"
+	bottom: "ip4_c"
+	top: "loss"
+}

@@ -1,4 +1,4 @@
-net: "object_pose_recognition/model/train_val.prototxt"
+net: "object_pose_recognition/model/train_val_trip.prototxt"
 test_iter: 1000
 test_interval: 1000
 base_lr: 0.01
@@ -11,4 +11,4 @@ momentum: 0.9
 weight_decay: 0.0005
 snapshot: 10000
 snapshot_prefix: "object_pose_recognition/model/caffenet_train"
-solver_mode: GPU
+solver_mode: CPU

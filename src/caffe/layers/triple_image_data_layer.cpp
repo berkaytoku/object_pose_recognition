@@ -16,18 +16,20 @@
 namespace caffe {
 
 template <typename Dtype>
-ImageDataLayer<Dtype>::~ImageDataLayer<Dtype>() {
+TripleImageDataLayer<Dtype>::~TripleImageDataLayer<Dtype>() {
   this->JoinPrefetchThread();
 }
 
 template <typename Dtype>
-void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
+void TripleImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   const int new_height = this->layer_param_.image_data_param().new_height();
   const int new_width  = this->layer_param_.image_data_param().new_width();
   const bool is_color  = this->layer_param_.image_data_param().is_color();
   string root_folder = this->layer_param_.image_data_param().root_folder();
 
+  this->output_labels_ = false;
+    
   CHECK((new_height == 0 && new_width == 0) ||
       (new_height > 0 && new_width > 0)) << "Current implementation requires "
       "new_height and new_width to be set at the same time.";
@@ -75,14 +77,14 @@ void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
       << top[0]->channels() << "," << top[0]->height() << ","
       << top[0]->width();
   // label
-  vector<int> label_shape(1, batch_size);
+  //vector<int> label_shape(1, batch_size);
   top[1]->ReshapeLike(this->prefetch_data_);
   top[2]->ReshapeLike(this->prefetch_data_);
-  this->prefetch_label_.Reshape(label_shape);
+  //this->prefetch_label_.Reshape(label_shape);
 }
 
 template <typename Dtype>
-void ImageDataLayer<Dtype>::ShuffleImages() {
+void TripleImageDataLayer<Dtype>::ShuffleImages() {
   caffe::rng_t* prefetch_rng =
       static_cast<caffe::rng_t*>(prefetch_rng_->generator());
   shuffle(lines_.begin(), lines_.end(), prefetch_rng);
@@ -90,7 +92,7 @@ void ImageDataLayer<Dtype>::ShuffleImages() {
 
 // This function is used to create a thread that prefetches the data.
 template <typename Dtype>
-void ImageDataLayer<Dtype>::InternalThreadEntry() {
+void TripleImageDataLayer<Dtype>::InternalThreadEntry() {
   CPUTimer batch_timer;
   batch_timer.Start();
   double read_time = 0;
@@ -117,7 +119,7 @@ void ImageDataLayer<Dtype>::InternalThreadEntry() {
   this->prefetch_data_.Reshape(top_shape);
 
   Dtype* prefetch_data = this->prefetch_data_.mutable_cpu_data();
-  Dtype* prefetch_label = this->prefetch_label_.mutable_cpu_data();
+  //Dtype* prefetch_label = this->prefetch_label_.mutable_cpu_data();
 
   // datum scales
   const int lines_size = lines_.size();
@@ -136,7 +138,7 @@ void ImageDataLayer<Dtype>::InternalThreadEntry() {
     this->data_transformer_->Transform(cv_img, &(this->transformed_data_));
     trans_time += timer.MicroSeconds();
 
-    prefetch_label[item_id] = lines_[lines_id_].second;
+    //prefetch_label[item_id] = lines_[lines_id_].second;
     // go to the next iter
     lines_id_++;
     if (lines_id_ >= lines_size) {
@@ -154,7 +156,7 @@ void ImageDataLayer<Dtype>::InternalThreadEntry() {
   DLOG(INFO) << "Transform time: " << trans_time / 1000 << " ms.";
 }
 
-INSTANTIATE_CLASS(ImageDataLayer);
-REGISTER_LAYER_CLASS(ImageData);
+INSTANTIATE_CLASS(TripleImageDataLayer);
+REGISTER_LAYER_CLASS(TripleImageData);
 
 }  // namespace caffe

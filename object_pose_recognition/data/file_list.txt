@@ -18,4 +18,4 @@
 ./object_pose_recognition/data/OPR-Dataset/class6/data/color2.jpg 6
 ./object_pose_recognition/data/OPR-Dataset/class7/data/color0.jpg 7
 ./object_pose_recognition/data/OPR-Dataset/class7/data/color1.jpg 7
-./object_pose_recognition/data/OPR-Dataset/class8/data/color2.jpg 7
+./object_pose_recognition/data/OPR-Dataset/class7/data/color2.jpg 7
