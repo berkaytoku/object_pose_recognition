@@ -86,7 +86,6 @@ void TripleImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bot
       << top[0]->width();
   // label
   //vector<int> label_shape(1, batch_size);
-
   //this->prefetch_label_.Reshape(label_shape);
 }
 
@@ -147,19 +146,19 @@ void TripleImageDataLayer<Dtype>::InternalThreadEntry() {
           this->transformed_data_.set_cpu_data(prefetch_data + offset + imgOffset*i);
           this->data_transformer_->Transform(cv_img, &(this->transformed_data_));
           trans_time += timer.MicroSeconds();
-          
-          //prefetch_label[item_id] = lines_[lines_id_].second;
-          // go to the next iter
-          lines_id_++;
-          if (lines_id_ >= lines_size) {
-              // We have reached the end. Restart from the first.
-              DLOG(INFO) << "Restarting data prefetching from start.";
-              lines_id_ = 0;
-              if (this->layer_param_.image_data_param().shuffle()) {
-                  ShuffleImages();
-              }
+       }   
+       
+       //prefetch_label[item_id] = (double)lines_[lines_id_].at(3);
+       // go to the next iter
+       lines_id_++;
+       if (lines_id_ >= lines_size) {
+          // We have reached the end. Restart from the first.
+          DLOG(INFO) << "Restarting data prefetching from start.";
+          lines_id_ = 0;
+          if (this->layer_param_.image_data_param().shuffle()) {
+              ShuffleImages();
           }
-      }
+       }
   }
   batch_timer.Stop();
   DLOG(INFO) << "Prefetch batch: " << batch_timer.MilliSeconds() << " ms.";
