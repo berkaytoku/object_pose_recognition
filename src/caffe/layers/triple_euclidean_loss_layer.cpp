@@ -33,11 +33,16 @@ void TripleEuclideanLossLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   int count = bottom[0]->count();
+  vector<double> temp; // lowerside -- xi-xj
+  vector<double> temp0; // upperside  -- xi-xk 
+  vector<double> pair;
+  float m = 0.01;
   caffe_sub(
       count,
       bottom[0]->cpu_data(),  // a
       bottom[1]->cpu_data(),  // b
       diff_.mutable_cpu_data());  // a_i-b_i
+
   const int channels = bottom[0]->channels();
   Dtype margin = this->layer_param_.contrastive_loss_param().margin();
   bool legacy_version =
@@ -46,6 +51,12 @@ void TripleEuclideanLossLayer<Dtype>::Forward_cpu(
   for (int i = 0; i < bottom[0]->num(); ++i) {
     dist_sq_.mutable_cpu_data()[i] = caffe_cpu_dot(channels,
         diff_.cpu_data() + (i*channels), diff_.cpu_data() + (i*channels));
+
+      temp.push_back(sqrt(dist_sq_.cpu_data()[i]) + m);
+      pair.push_back(pow(sqrt(dist_sq_.cpu_data()[i]),2));
+      loss += pair.at(i);      
+
+/*
     if (static_cast<int>(bottom[2]->cpu_data()[i])) {  // similar pairs
       loss += dist_sq_.cpu_data()[i];
     } else {  // dissimilar pairs
@@ -55,9 +66,28 @@ void TripleEuclideanLossLayer<Dtype>::Forward_cpu(
         Dtype dist = std::max(margin - sqrt(dist_sq_.cpu_data()[i]), 0.0);
         loss += dist*dist;
       }
-    }
+    }*/
   }
-  loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);
+  caffe_sub(
+      count,
+      bottom[0]->cpu_data(),  // a
+      bottom[2]->cpu_data(),  // b
+      diff_.mutable_cpu_data());  // a_i-b_i
+  
+  for(int j=0; j<bottom[0]->num(); j++) {
+	dist_sq_.mutable_cpu_data()[j] = caffe_cpu_dot(channels,
+        diff_.cpu_data() + (j*channels), diff_.cpu_data() + (j*channels));
+  	temp0.push_back(sqrt(dist_sq_.cpu_data()[j]));
+        Dtype dist = std::max(1-(temp0.at(j)/temp.at(j)), 0.0);
+        loss += dist; 
+  }
+  
+ 
+  
+
+
+
+  //loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);
   top[0]->mutable_cpu_data()[0] = loss;
 }
 

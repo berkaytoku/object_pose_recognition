@@ -12,6 +12,8 @@ template <typename Dtype>
 void TripleEuclideanLossLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   const int count = bottom[0]->count();
+  vector<double> temp0, temp, pair;
+  float m = 0.01;
   caffe_gpu_sub(
       count,
       bottom[0]->gpu_data(),  // a
@@ -35,6 +37,35 @@ void TripleEuclideanLossLayer<Dtype>::Forward_gpu(
   bool legacy_version =
       this->layer_param_.contrastive_loss_param().legacy_version();
   Dtype loss(0.0);
+  
+
+for (int i = 0; i < bottom[0]->num(); ++i) {
+      temp.push_back(sqrt(diff_sq_.cpu_data()[i]) + m);
+      pair.push_back(pow(sqrt(diff_sq_.cpu_data()[i]),2));
+      loss += pair.at(i);
+}
+
+
+  caffe_gpu_sub(
+      count,
+      bottom[0]->gpu_data(),  // a
+      bottom[2]->gpu_data(),  // b
+      diff_.mutable_gpu_data());  // a_i-b_i
+
+  caffe_gpu_powx(
+      count,
+      diff_.mutable_gpu_data(),  // a_i-b_i
+      Dtype(2),
+      diff_sq_.mutable_gpu_data());
+  
+  for(int j=0; j<bottom[0]->num(); j++) {
+  	temp0.push_back(sqrt(diff_sq_.cpu_data()[j]));
+        Dtype dist = std::max(1-(temp0.at(j)/temp.at(j)), 0.0);
+        loss += dist; 
+
+}
+  
+/*
   for (int i = 0; i < bottom[0]->num(); ++i) {
     if (static_cast<int>(bottom[2]->cpu_data()[i])) {  // similar pairs
       loss += dist_sq_.cpu_data()[i];
@@ -48,7 +79,7 @@ void TripleEuclideanLossLayer<Dtype>::Forward_gpu(
       }
     }
   }
-  loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);
+  loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);*/
   top[0]->mutable_cpu_data()[0] = loss;
 }
 
