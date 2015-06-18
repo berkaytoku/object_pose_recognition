@@ -33,10 +33,8 @@ void TripleEuclideanLossLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   int count = bottom[0]->count();
-  vector<double> temp; // lowerside -- xi-xj
-  vector<double> temp0; // upperside  -- xi-xk 
-  vector<double> pair;
-  float m = 0.01;
+
+  double m = 0.01;
   caffe_sub(
       count,
       bottom[0]->cpu_data(),  // a
@@ -48,26 +46,17 @@ void TripleEuclideanLossLayer<Dtype>::Forward_cpu(
   bool legacy_version =
       this->layer_param_.contrastive_loss_param().legacy_version();
   Dtype loss(0.0);
+  double tempDenominator = 0.0;
+  double tempNumerator = 0.0;
   for (int i = 0; i < bottom[0]->num(); ++i) {
     dist_sq_.mutable_cpu_data()[i] = caffe_cpu_dot(channels,
         diff_.cpu_data() + (i*channels), diff_.cpu_data() + (i*channels));
-
-      temp.push_back(sqrt(dist_sq_.cpu_data()[i]) + m);
-      pair.push_back(pow(sqrt(dist_sq_.cpu_data()[i]),2));
-      loss += pair.at(i);      
-
-/*
-    if (static_cast<int>(bottom[2]->cpu_data()[i])) {  // similar pairs
-      loss += dist_sq_.cpu_data()[i];
-    } else {  // dissimilar pairs
-      if (legacy_version) {
-        loss += std::max(margin - dist_sq_.cpu_data()[i], Dtype(0.0));
-      } else {
-        Dtype dist = std::max(margin - sqrt(dist_sq_.cpu_data()[i]), 0.0);
-        loss += dist*dist;
-      }
-    }*/
+    tempDenominator += dist_sq_.mutable_cpu_data()[i];      
   }
+  
+  double tempPairDenominator = pow(tempDenominator,2);
+  tempDenominator = sqrt(tempDenominator) + m;  
+  
   caffe_sub(
       count,
       bottom[0]->cpu_data(),  // a
@@ -77,16 +66,13 @@ void TripleEuclideanLossLayer<Dtype>::Forward_cpu(
   for(int j=0; j<bottom[0]->num(); j++) {
 	dist_sq_.mutable_cpu_data()[j] = caffe_cpu_dot(channels,
         diff_.cpu_data() + (j*channels), diff_.cpu_data() + (j*channels));
-  	temp0.push_back(sqrt(dist_sq_.cpu_data()[j]));
-        Dtype dist = std::max(1-(temp0.at(j)/temp.at(j)), 0.0);
-        loss += dist; 
+  	tempNumerator += dist_sq_.mutable_cpu_data()[j];
   }
   
- 
+  tempNumerator = sqrt(tempNumerator);
+  Dtype dist = std::max(1-(tempNumerator/tempDenominator), 0.0);
+  loss += dist + tempPairDenominator;
   
-
-
-
   //loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);
   top[0]->mutable_cpu_data()[0] = loss;
 }

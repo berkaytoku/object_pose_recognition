@@ -38,13 +38,14 @@ void TripleEuclideanLossLayer<Dtype>::Forward_gpu(
       this->layer_param_.contrastive_loss_param().legacy_version();
   Dtype loss(0.0);
   
+  double tempDenominator = 0.0;
+  
+  for (int i = 0; i < bottom[0]->num(); ++i) {
+      tempDenominator += diff_sq_.cpu_data()[i];
+  }
 
-for (int i = 0; i < bottom[0]->num(); ++i) {
-      temp.push_back(sqrt(diff_sq_.cpu_data()[i]) + m);
-      pair.push_back(pow(sqrt(diff_sq_.cpu_data()[i]),2));
-      loss += pair.at(i);
-}
-
+  double denomForPair = pow(tempDenominator,2);
+  tempDenominator = sqrt(tempDenominator) + m;
 
   caffe_gpu_sub(
       count,
@@ -57,29 +58,26 @@ for (int i = 0; i < bottom[0]->num(); ++i) {
       diff_.mutable_gpu_data(),  // a_i-b_i
       Dtype(2),
       diff_sq_.mutable_gpu_data());
+  caffe_gpu_gemv(
+      CblasNoTrans,
+      bottom[0]->num(),
+      bottom[0]->channels(),
+      Dtype(1.0),
+      diff_sq_.gpu_data(),  // (a_i-b_i)^2
+      summer_vec_.gpu_data(),
+      Dtype(0.0),
+      dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
   
+  double tempNumerator = 0.0;
   for(int j=0; j<bottom[0]->num(); j++) {
-  	temp0.push_back(sqrt(diff_sq_.cpu_data()[j]));
-        Dtype dist = std::max(1-(temp0.at(j)/temp.at(j)), 0.0);
-        loss += dist; 
-
-}
-  
-/*
-  for (int i = 0; i < bottom[0]->num(); ++i) {
-    if (static_cast<int>(bottom[2]->cpu_data()[i])) {  // similar pairs
-      loss += dist_sq_.cpu_data()[i];
-    } else {  // dissimilar pairs
-      if (legacy_version) {
-        loss += std::max(margin - dist_sq_.cpu_data()[i], Dtype(0.0));
-      } else {
-        Dtype dist = std::max(margin - sqrt(dist_sq_.cpu_data()[i]),
-                              Dtype(0.0));
-        loss += dist*dist;
-      }
-    }
+	tempNumerator += diff_sq_.mutable_cpu_data()[j];  	
   }
-  loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);*/
+
+  tempNumerator = sqrt(tempNumerator);
+  Dtype dist = std::max(1-(tempNumerator/tempDenominator), 0.0);
+  loss += dist + denomForPair;
+  
+  //loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);
   top[0]->mutable_cpu_data()[0] = loss;
 }
 

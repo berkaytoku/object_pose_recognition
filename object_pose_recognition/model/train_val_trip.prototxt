@@ -5,7 +5,7 @@ layer {
   top: "data"
   image_data_param {
  	source: "./object_pose_recognition/data/file_list.txt"
-    batch_size: 64
+    batch_size: 3
     new_height: 64
     new_width: 64
   }
