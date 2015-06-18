@@ -44,7 +44,7 @@ void TripleEuclideanLossLayer<Dtype>::Forward_gpu(
       tempDenominator += diff_sq_.cpu_data()[i];
   }
 
-  double denomForPair = pow(tempDenominator,2);
+  double denomForPair = tempDenominator;
   tempDenominator = sqrt(tempDenominator) + m;
 
   caffe_gpu_sub(

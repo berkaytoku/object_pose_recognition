@@ -54,7 +54,7 @@ void TripleEuclideanLossLayer<Dtype>::Forward_cpu(
     tempDenominator += dist_sq_.mutable_cpu_data()[i];      
   }
   
-  double tempPairDenominator = pow(tempDenominator,2);
+  double tempPairDenominator = tempDenominator;
   tempDenominator = sqrt(tempDenominator) + m;  
   
   caffe_sub(
