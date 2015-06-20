@@ -1,0 +1,2 @@
+./object_pose_recognition/data/OPR-Dataset/class1/data/color0.jpg ./object_pose_recognition/data/OPR-Dataset/class1/data/color1.jpg
+./object_pose_recognition/data/OPR-Dataset/class2/data/color3.jpg ./object_pose_recognition/data/OPR-Dataset/class1/data/color5.jpg 

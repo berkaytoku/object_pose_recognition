@@ -211,14 +211,14 @@ class ContrastiveLossLayer : public LossLayer<Dtype> {
 };
 
 template <typename Dtype>
-class TripleEuclideanLossLayer : public LossLayer<Dtype> {
+class TriplePairEuclideanLossLayer : public LossLayer<Dtype> {
 public:
-    explicit TripleEuclideanLossLayer(const LayerParameter& param)
+    explicit TriplePairEuclideanLossLayer(const LayerParameter& param)
     : LossLayer<Dtype>(param), diff_() {}
     virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
                             const vector<Blob<Dtype>*>& top);
     
-    virtual inline int ExactNumBottomBlobs() const { return 3; }
+    virtual inline int ExactNumBottomBlobs() const { return 5; }
     virtual inline const char* type() const { return "ContrastiveLoss"; }
     /**
      * Unlike most loss layers, in the ContrastiveLossLayer we can backpropagate
