@@ -213,8 +213,8 @@ class ContrastiveLossLayer : public LossLayer<Dtype> {
 template <typename Dtype>
 class TriplePairEuclideanLossLayer : public LossLayer<Dtype> {
 public:
-    explicit TriplePairEuclideanLossLayer(const LayerParameter& param)
-    : LossLayer<Dtype>(param), diff_() {}
+	explicit TriplePairEuclideanLossLayer(const LayerParameter& param)
+    : LossLayer<Dtype>(param), diff_()  {}
     virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
                             const vector<Blob<Dtype>*>& top);
     
@@ -225,7 +225,8 @@ public:
      * to the first two inputs.
      */
     virtual inline bool AllowForceBackward(const int bottom_index) const {
-        return bottom_index != 2;
+        //return bottom_index != 2;
+		return true;
     }
     
 protected:
@@ -269,6 +270,12 @@ protected:
     Blob<Dtype> dist_sq_;  // cached for backward pass
     Blob<Dtype> diff_sq_;  // tmp storage for gpu forward pass
     Blob<Dtype> summer_vec_;  // tmp storage for gpu forward pass
+	Blob<Dtype> xixj_diff_;
+	Blob<Dtype> xixk_diff_;
+	Blob<Dtype> xixj_p_diff_;
+	Blob<Dtype> xixj_dist_sq_;
+	Blob<Dtype> xixk_dist_sq_;
+	Blob<Dtype> xixj_p_dist_sq_;
 };
 
 /**

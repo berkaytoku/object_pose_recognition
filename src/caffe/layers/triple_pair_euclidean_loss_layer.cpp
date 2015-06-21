@@ -20,8 +20,14 @@ void TriplePairEuclideanLossLayer<Dtype>::LayerSetUp(
   CHECK_EQ(bottom[2]->height(), 1);
   CHECK_EQ(bottom[2]->width(), 1);
   diff_.Reshape(bottom[0]->num(), bottom[0]->channels(), 1, 1);
+  xixj_diff_.Reshape(bottom[0]->num(), bottom[0]->channels(), 1, 1);
+  xixk_diff_.Reshape(bottom[0]->num(), bottom[0]->channels(), 1, 1);
+  xixj_p_diff_.Reshape(bottom[0]->num(), bottom[0]->channels(), 1, 1);
   diff_sq_.Reshape(bottom[0]->num(), bottom[0]->channels(), 1, 1);
   dist_sq_.Reshape(bottom[0]->num(), 1, 1, 1);
+  xixj_dist_sq_.Reshape(bottom[0]->num(), bottom[0]->channels(), 1, 1);
+  xixk_dist_sq_.Reshape(bottom[0]->num(), bottom[0]->channels(), 1, 1);
+  xixj_p_dist_sq_.Reshape(bottom[0]->num(), bottom[0]->channels(), 1, 1);
   // vector of ones used to sum along channels
   summer_vec_.Reshape(bottom[0]->channels(), 1, 1, 1);
   for (int i = 0; i < bottom[0]->channels(); ++i)
@@ -39,35 +45,32 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_cpu(
       count,
       bottom[0]->cpu_data(),  // a
       bottom[1]->cpu_data(),  // b
-      diff_.mutable_cpu_data());  // a_i-b_i
-
+      xixj_diff_.mutable_cpu_data());  // a_i-b_i
   const int channels = bottom[0]->channels();
-  Dtype margin = this->layer_param_.contrastive_loss_param().margin();
-  bool legacy_version =
-      this->layer_param_.contrastive_loss_param().legacy_version();
+  //Dtype margin = this->layer_param_.contrastive_loss_param().margin();
+  //bool legacy_version = this->layer_param_.contrastive_loss_param().legacy_version();
   Dtype loss(0.0);
   double tempDenominator = 0.0;
   double tempNumerator = 0.0;
-  for (int i = 0; i < bottom[0]->num(); ++i) {
-    dist_sq_.mutable_cpu_data()[i] = caffe_cpu_dot(channels,
-        diff_.cpu_data() + (i*channels), diff_.cpu_data() + (i*channels));
-    tempDenominator += dist_sq_.mutable_cpu_data()[i];      
-  }
-
-  tempDenominator = sqrt(tempDenominator) + m;  
   
+  for (int i = 0; i < bottom[0]->num(); ++i) {
+    xixj_dist_sq_.mutable_cpu_data()[i] = caffe_cpu_dot(channels,
+        xixj_diff_.cpu_data() + (i*channels), xixj_diff_.cpu_data() + (i*channels));
+    tempDenominator += xixj_dist_sq_.mutable_cpu_data()[i];      
+  }
+  tempDenominator = sqrt(tempDenominator) + m;  
+  tempDenominator += m;
   caffe_sub(
       count,
       bottom[0]->cpu_data(),  // a
       bottom[2]->cpu_data(),  // b
-      diff_.mutable_cpu_data());  // a_i-b_i
+      xixk_diff_.mutable_cpu_data());  // a_i-b_i
   
   for(int j=0; j<bottom[0]->num(); j++) {
-	dist_sq_.mutable_cpu_data()[j] = caffe_cpu_dot(channels,
-        diff_.cpu_data() + (j*channels), diff_.cpu_data() + (j*channels));
-  	tempNumerator += dist_sq_.mutable_cpu_data()[j];
+	xixk_dist_sq_.mutable_cpu_data()[j] = caffe_cpu_dot(channels,
+        xixk_diff_.cpu_data() + (j*channels), xixk_diff_.cpu_data() + (j*channels));
+      tempNumerator += xixk_dist_sq_.mutable_cpu_data()[j];
   }
-  
   tempNumerator = sqrt(tempNumerator);
   Dtype dist = std::max(1-(tempNumerator/tempDenominator), 0.0);
   loss += dist;
@@ -77,11 +80,12 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_cpu(
       count,
       bottom[3]->cpu_data(),  // a
       bottom[4]->cpu_data(),  // b
-      diff_.mutable_cpu_data());  // a_i-b_i
+      xixj_p_diff_.mutable_cpu_data());  // a_i-b_i
+	  
   for(int k=0; k<bottom[0]->num(); k++) {
-	dist_sq_.mutable_cpu_data()[k] = caffe_cpu_dot(channels,
-        diff_.cpu_data() + (k*channels), diff_.cpu_data() + (k*channels));
-  	tempPairDenominator += dist_sq_.mutable_cpu_data()[k];
+	xixj_p_dist_sq_.mutable_cpu_data()[k] = caffe_cpu_dot(channels,
+        xixj_p_diff_.cpu_data() + (k*channels), xixj_p_diff_.cpu_data() + (k*channels));
+  	tempPairDenominator += xixj_p_dist_sq_.mutable_cpu_data()[k];
   }
   loss += tempPairDenominator;
   
@@ -92,10 +96,29 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_cpu(
 template <typename Dtype>
 void TriplePairEuclideanLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
-  Dtype margin = this->layer_param_.contrastive_loss_param().margin();
-  bool legacy_version =
-      this->layer_param_.contrastive_loss_param().legacy_version();
-  for (int i = 0; i < 2; ++i) {
+  //Dtype margin = this->layer_param_.contrastive_loss_param().margin();
+  //bool legacy_version = this->layer_param_.contrastive_loss_param().legacy_version();
+
+
+    for(int i = 0; i < 5; ++i){
+      if(propagate_down[i] && i < 3){ //triple
+        int num = bottom[i]->num();
+		int channels = bottom[i]->channels();
+		for (int j = 0; j < num; ++j) {
+			Dtype* bout = bottom[i]->mutable_cpu_diff();
+			//todo:: gradient of loss equation
+			//dLoss/dxi
+			//bout[j] = (xixj_diff_.mutable_cpu_data()[j] * sqrt(xixk_dist_sq_.mutable_cpu_data()[j]))/(xixj_dist_sq_.mutable_cpu_data()[j] * xixk_diff_.mutable_cpu_data()[j]);
+			//+dLoss/dxj
+			//bout[j] -= 
+			//+dLoss/dxk
+		}
+      }
+	  else if(propagate_down[i] && i >= 3){ //pair
+		  
+	  }
+    }
+/*  for (int i = 0; i < 2; ++i) {
     if (propagate_down[i]) {
       const Dtype sign = (i == 0) ? 1 : -1;
       const Dtype alpha = sign * top[0]->cpu_diff()[0] /
@@ -135,7 +158,7 @@ void TriplePairEuclideanLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*
         }
       }
     }
-  }
+  }*/
 }
 
 #ifdef CPU_ONLY

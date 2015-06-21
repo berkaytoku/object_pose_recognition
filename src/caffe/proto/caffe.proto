@@ -1067,6 +1067,7 @@ message V1LayerParameter {
   optional LossParameter loss_param = 42;
   optional V0LayerParameter layer = 1;
   optional TripleImageDataParameter triple_image_data_param = 43;
+  optional PairImageDataParameter pair_image_data_param = 44;
 }
 
 // DEPRECATED: V0LayerParameter is the old way of specifying layer parameters
