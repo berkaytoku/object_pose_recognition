@@ -18,10 +18,10 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
       count,
       bottom[0]->gpu_data(),  // a
       bottom[1]->gpu_data(),  // b
-      diff_.mutable_gpu_data());  // a_i-b_i
+      xixj_diff_.mutable_gpu_data());  // a_i-b_i
   caffe_gpu_powx(
       count,
-      diff_.mutable_gpu_data(),  // a_i-b_i
+      xixj_diff_.mutable_gpu_data(),  // a_i-b_i
       Dtype(2),
       diff_sq_.mutable_gpu_data());  // (a_i-b_i)^2
   caffe_gpu_gemv(
@@ -32,7 +32,7 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
       diff_sq_.gpu_data(),  // (a_i-b_i)^2
       summer_vec_.gpu_data(),
       Dtype(0.0),
-      dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
+      xixj_dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
   Dtype margin = this->layer_param_.contrastive_loss_param().margin();
   bool legacy_version =
       this->layer_param_.contrastive_loss_param().legacy_version();
@@ -50,11 +50,11 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
       count,
       bottom[0]->gpu_data(),  // a
       bottom[2]->gpu_data(),  // b
-      diff_.mutable_gpu_data());  // a_i-b_i
+      xixk_diff_.mutable_gpu_data());  // a_i-b_i
 
   caffe_gpu_powx(
       count,
-      diff_.mutable_gpu_data(),  // a_i-b_i
+      xixk_diff_.mutable_gpu_data(),  // a_i-b_i
       Dtype(2),
       diff_sq_.mutable_gpu_data());
   caffe_gpu_gemv(
@@ -65,7 +65,7 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
       diff_sq_.gpu_data(),  // (a_i-b_i)^2
       summer_vec_.gpu_data(),
       Dtype(0.0),
-      dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
+      xixk_dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
   
   double tempNumerator = 0.0;
   for(int j=0; j<bottom[0]->num(); j++) {
@@ -80,7 +80,7 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
       count,
       bottom[3]->gpu_data(),  // a
       bottom[4]->gpu_data(),  // b
-      diff_.mutable_gpu_data());  // a_i-b_i
+      xixj_p_diff_.mutable_gpu_data());  // a_i-b_i
   caffe_gpu_powx(
       count,
       diff_.mutable_gpu_data(),  // a_i-b_i
@@ -94,7 +94,7 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
       diff_sq_.gpu_data(),  // (a_i-b_i)^2
       summer_vec_.gpu_data(),
       Dtype(0.0),
-      dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
+      xixj_p_dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
   double denomForPair = 0.0;
   for(int k=0; k<bottom[0]->num(); k++) {
 	denomForPair += diff_sq_.mutable_cpu_data()[k];  	
@@ -106,57 +106,57 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
 }
 
 template <typename Dtype>
-__global__ void CLLBackward(const int count, const int channels,
-    const Dtype margin, const bool legacy_version, const Dtype alpha,
-    const Dtype* y, const Dtype* diff, const Dtype* dist_sq,
-    Dtype *bottom_diff) {
+__global__ void CLLBackward(const int count, const int channels, int bottom_index, const Dtype *x,
+    Dtype *bottom_diff, const Dtype *xixj_dist_sq_, const Dtype *xixk_dist_sq_) {
+  Dtype bottom_diff_val(0.0);
   CUDA_KERNEL_LOOP(i, count) {
-    int n = i / channels;  // the num index, to access y and dist_sq
-    if (static_cast<int>(y[n])) {  // similar pairs
-      bottom_diff[i] = alpha * diff[i];
-    } else {  // dissimilar pairs
-      Dtype mdist(0.0);
-      Dtype beta(0.0);
-      if (legacy_version) {
-        mdist = (margin - dist_sq[n]);
-        beta = -alpha;
-      } else {
-        Dtype dist = sqrt(dist_sq[n]);
-        mdist = (margin - dist);
-        beta = -alpha * mdist / (dist + Dtype(1e-4)) * diff[i];
-      }
-      if (mdist > 0.0) {
-        bottom_diff[i] = beta;
-      } else {
-        bottom_diff[i] = 0;
-      }
-    }
+    //int n = i / channels;  // the num index, to access y and dist_sq
+	 
+		  if(bottom_index < 3){ //triple
+				//gradient of loss equation
+				if(bottom_index == 0){ //dLoss/dxi
+					bottom_diff_val = sqrt(xixk_dist_sq_[i])/ sqrt(xixj_dist_sq_[i]);
+				}
+				else if (bottom_index == 1){ //dLoss/dxj
+					bottom_diff_val = -(x[i] / sqrt(xixj_dist_sq_[i]));
+				}			
+				else if (bottom_index == 2){ //dLoss/dxk
+					bottom_diff_val = -(sqrt(xixk_dist_sq_[i]) / x[i]);
+				}
+		  }
+		  else if(bottom_index >= 3){ //pair
+			  //gradient of loss equation
+			  if (bottom_index == 3){ //dLoss/dxi_p
+				  bottom_diff_val = 2 * x[i];
+			  }
+			  else if (bottom_index == 4){ //dLoss/dxj_p
+				  bottom_diff_val = -(2 * x[i]);
+			  }  
+		  }
+		  if (bottom_diff_val > 0.0){
+			bottom_diff[i] = bottom_diff_val;
+		  }
+		  else{
+			bottom_diff[i] = 0;
+		  }
+				
   }
 }
 
 template <typename Dtype>
 void TriplePairEuclideanLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
-  for (int i = 0; i < 2; ++i) {
-    if (propagate_down[i]) {
-      const int count = bottom[0]->count();
-      const int channels = bottom[0]->channels();
-      Dtype margin = this->layer_param_.contrastive_loss_param().margin();
-      const bool legacy_version =
-          this->layer_param_.contrastive_loss_param().legacy_version();
-      const Dtype sign = (i == 0) ? 1 : -1;
-      const Dtype alpha = sign * top[0]->cpu_diff()[0] /
-          static_cast<Dtype>(bottom[0]->num());
-      // NOLINT_NEXT_LINE(whitespace/operators)
-      CLLBackward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-          count, channels, margin, legacy_version, alpha,
-          bottom[2]->gpu_data(),  // pair similarity 0 or 1
-          diff_.gpu_data(),  // the cached eltwise difference between a and b
-          dist_sq_.gpu_data(),  // the cached square distance between a and b
-          bottom[i]->mutable_gpu_diff());
-      CUDA_POST_KERNEL_CHECK;
+	for(int i = 0; i < 5; ++i){
+	  Dtype* bout = bottom[i]->mutable_cpu_diff();
+	  //int num = bottom[i]->num();
+	  int count = bottom[i]->count();
+	  int channels = bottom[i]->channels();
+	   if (propagate_down[i]) {
+		  CLLBackward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+		  count, channels, i, bottom[i]->gpu_data(), bottom[i]->mutable_gpu_diff(), xixj_dist_sq_.gpu_data(), xixk_dist_sq_.gpu_data());
+		  CUDA_POST_KERNEL_CHECK;
+	  }
     }
-  }
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(TriplePairEuclideanLossLayer);

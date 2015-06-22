@@ -101,22 +101,40 @@ void TriplePairEuclideanLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*
 
 
     for(int i = 0; i < 5; ++i){
-      if(propagate_down[i] && i < 3){ //triple
-        int num = bottom[i]->num();
-		int channels = bottom[i]->channels();
-		for (int j = 0; j < num; ++j) {
-			Dtype* bout = bottom[i]->mutable_cpu_diff();
-			//todo:: gradient of loss equation
-			//dLoss/dxi
-			//bout[j] = (xixj_diff_.mutable_cpu_data()[j] * sqrt(xixk_dist_sq_.mutable_cpu_data()[j]))/(xixj_dist_sq_.mutable_cpu_data()[j] * xixk_diff_.mutable_cpu_data()[j]);
-			//+dLoss/dxj
-			//bout[j] -= 
-			//+dLoss/dxk
-		}
-      }
-	  else if(propagate_down[i] && i >= 3){ //pair
-		  
+	  Dtype* bout = bottom[i]->mutable_cpu_diff();
+	  Dtype bottom_diff_val(0.0);
+	  int num = bottom[i]->num();
+	  int channels = bottom[i]->channels();
+	  for (int j = 0; j < num; ++j) {
+		  if(propagate_down[i] && i < 3){ //triple
+				//gradient of loss equation
+				if(i == 0){ //dLoss/dxi
+					bout[j] = sqrt(xixk_dist_sq_.mutable_cpu_data()[j])/ sqrt(xixj_dist_sq_.mutable_cpu_data()[j]);
+				}
+				else if (i == 1){ //dLoss/dxj
+					bout[j] = -(bottom[i]->mutable_cpu_data()[j] / sqrt(xixj_dist_sq_.mutable_cpu_data()[j]));
+				}			
+				else if (i == 2){ //dLoss/dxk
+					bout[j] = -(sqrt(xixk_dist_sq_.mutable_cpu_data()[j]) / bottom[i]->mutable_cpu_data()[j]);
+				}
+		  }
+		  else if(propagate_down[i] && i >= 3){ //pair
+			  //gradient of loss equation
+			  if (i == 3){ //dLoss/dxi_p
+				  bout[j] = 2 * bottom[i]->mutable_cpu_data()[j];
+			  }
+			  else if (i == 4){ //dLoss/dxj_p
+				  bout[j] = -(2 * bottom[i]->mutable_cpu_data()[j]);
+			  }
+		  }
+		  if (bottom_diff_val > 0.0){
+			bout[j] = bottom_diff_val;
+		  }
+		  else{
+			bout[j] = 0;
+		  }
 	  }
+	  
     }
 /*  for (int i = 0; i < 2; ++i) {
     if (propagate_down[i]) {
