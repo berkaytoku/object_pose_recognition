@@ -108,24 +108,24 @@ void TriplePairEuclideanLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*
 	  for (int j = 0; j < num; ++j) {
 		  if(propagate_down[i] && i < 3){ //triple
 				//gradient of loss equation
-				if(i == 0){ //dLoss/dxi
-					bout[j] = sqrt(xixk_dist_sq_.mutable_cpu_data()[j])/ sqrt(xixj_dist_sq_.mutable_cpu_data()[j]);
-				}
-				else if (i == 1){ //dLoss/dxj
-					bout[j] = -(bottom[i]->mutable_cpu_data()[j] / sqrt(xixj_dist_sq_.mutable_cpu_data()[j]));
-				}			
-				else if (i == 2){ //dLoss/dxk
-					bout[j] = -(sqrt(xixk_dist_sq_.mutable_cpu_data()[j]) / bottom[i]->mutable_cpu_data()[j]);
-				}
+			if(i == 0){ //dLoss/dxi
+				bottom_diff_val = sqrt(xixk_dist_sq_.mutable_cpu_data()[j])/ sqrt(xixj_dist_sq_.mutable_cpu_data()[j]);
+			}
+			else if (i == 1){ //dLoss/dxj
+				bottom_diff_val = -(bottom[i]->mutable_cpu_data()[j] / sqrt(xixj_dist_sq_.mutable_cpu_data()[j]));
+			}			
+			else if (i == 2){ //dLoss/dxk
+				bottom_diff_val = -(sqrt(xixk_dist_sq_.mutable_cpu_data()[j]) / bottom[i]->mutable_cpu_data()[j]);
+			}
 		  }
 		  else if(propagate_down[i] && i >= 3){ //pair
 			  //gradient of loss equation
-			  if (i == 3){ //dLoss/dxi_p
-				  bout[j] = 2 * bottom[i]->mutable_cpu_data()[j];
-			  }
-			  else if (i == 4){ //dLoss/dxj_p
-				  bout[j] = -(2 * bottom[i]->mutable_cpu_data()[j]);
-			  }
+			if (i == 3){ //dLoss/dxi_p
+				bottom_diff_val = 2 * bottom[i]->mutable_cpu_data()[j];
+			}
+			else if (i == 4){ //dLoss/dxj_p
+				bottom_diff_val = -(2 * bottom[i]->mutable_cpu_data()[j]);
+			}
 		  }
 		  if (bottom_diff_val > 0.0){
 			bout[j] = bottom_diff_val;
@@ -134,7 +134,6 @@ void TriplePairEuclideanLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*
 			bout[j] = 0;
 		  }
 	  }
-	  
     }
 /*  for (int i = 0; i < 2; ++i) {
     if (propagate_down[i]) {

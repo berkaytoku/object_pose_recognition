@@ -112,33 +112,33 @@ __global__ void CLLBackward(const int count, const int channels, int bottom_inde
   CUDA_KERNEL_LOOP(i, count) {
     //int n = i / channels;  // the num index, to access y and dist_sq
 	 
-		  if(bottom_index < 3){ //triple
-				//gradient of loss equation
-				if(bottom_index == 0){ //dLoss/dxi
-					bottom_diff_val = sqrt(xixk_dist_sq_[i])/ sqrt(xixj_dist_sq_[i]);
-				}
-				else if (bottom_index == 1){ //dLoss/dxj
-					bottom_diff_val = -(x[i] / sqrt(xixj_dist_sq_[i]));
-				}			
-				else if (bottom_index == 2){ //dLoss/dxk
-					bottom_diff_val = -(sqrt(xixk_dist_sq_[i]) / x[i]);
-				}
-		  }
-		  else if(bottom_index >= 3){ //pair
-			  //gradient of loss equation
-			  if (bottom_index == 3){ //dLoss/dxi_p
-				  bottom_diff_val = 2 * x[i];
-			  }
-			  else if (bottom_index == 4){ //dLoss/dxj_p
-				  bottom_diff_val = -(2 * x[i]);
-			  }  
-		  }
-		  if (bottom_diff_val > 0.0){
+		if(bottom_index < 3){ //triple
+			//gradient of loss equation
+			if(bottom_index == 0){ //dLoss/dxi
+				bottom_diff_val = sqrt(xixk_dist_sq_[i])/ sqrt(xixj_dist_sq_[i]);
+			}
+			else if (bottom_index == 1){ //dLoss/dxj
+				bottom_diff_val = -(x[i] / sqrt(xixj_dist_sq_[i]));
+			}			
+			else if (bottom_index == 2){ //dLoss/dxk
+				bottom_diff_val = -(sqrt(xixk_dist_sq_[i]) / x[i]);
+			}
+		}
+		else if(bottom_index >= 3){ //pair
+			//gradient of loss equation
+			if (bottom_index == 3){ //dLoss/dxi_p
+				bottom_diff_val = 2 * x[i];
+			}
+			else if (bottom_index == 4){ //dLoss/dxj_p
+				bottom_diff_val = -(2 * x[i]);
+			}  
+		}
+		if (bottom_diff_val > 0.0){
 			bottom_diff[i] = bottom_diff_val;
-		  }
-		  else{
+		}
+		else{
 			bottom_diff[i] = 0;
-		  }
+		}
 				
   }
 }
