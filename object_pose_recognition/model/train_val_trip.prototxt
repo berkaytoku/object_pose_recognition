@@ -11,7 +11,7 @@ layer {
   }
   transform_param {
 	scale: 0.00390625
-  #  mean_file: "./examples/cifar10/mean.binaryproto"
+   # mean_file: "./object_pose_recognition/data/imagenet_mean.binaryproto"
   }
 }
 layer {
@@ -26,7 +26,7 @@ layer {
   }
   transform_param {
 	scale: 0.00390625
-  #  mean_file: "./examples/cifar10/mean.binaryproto"
+  #  mean_file: "./object_pose_recognition/data/imagenet_mean.binaryproto"
   }
 }
 layer {
@@ -76,6 +76,12 @@ layer{
 		num_output: 16
 		kernel_size: 8
 		stride: 2
+		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+      			type: "constant"
+    		}
 	}
 }
 layer{
@@ -186,6 +192,12 @@ layer{
 		kernel_size: 5
 		pad: 1
 		stride: 2
+		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+      			type: "constant"
+    		}
 	}
 }
 layer{
@@ -273,45 +285,110 @@ layer{
 	type: "InnerProduct"
 	bottom: "pool2_a"
 	top: "ip3_a"
-	inner_product_param {
-		num_output: 256
+	param {
+    		lr_mult: 1
 	}
+  	param {
+    		lr_mult: 2
+  	}
+  	inner_product_param {
+    		num_output: 256
+    		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+		      type: "constant"
+		}
+
+  	}
 }
 layer{
         name: "ip3_b"
         type: "InnerProduct"
         bottom: "pool2_b"
         top: "ip3_b"
-        inner_product_param {
-                num_output: 256
-        }
+        param {
+    		lr_mult: 1
+	}
+  	param {
+    		lr_mult: 2
+  	}
+  	inner_product_param {
+    		num_output: 256
+    		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+		      type: "constant"
+		}
+
+  	}
 }
 layer{
         name: "ip3_c"
         type: "InnerProduct"
         bottom: "pool2_c"
         top: "ip3_c"
-        inner_product_param {
-                num_output: 256
-        }
+        param {
+    		lr_mult: 1
+	}
+  	param {
+    		lr_mult: 2
+  	}
+  	inner_product_param {
+    		num_output: 256
+    		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+		      type: "constant"
+		}
+
+  	}
 }
 layer{
 	name: "ip3_a_p"
 	type: "InnerProduct"
 	bottom: "pool2_a_p"
 	top: "ip3_a_p"
-	inner_product_param {
-		num_output: 256
+	param {
+    		lr_mult: 1
 	}
+  	param {
+    		lr_mult: 2
+  	}
+  	inner_product_param {
+    		num_output: 256
+    		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+		      type: "constant"
+		}
+
+  	}
 }
 layer{
         name: "ip3_b_p"
         type: "InnerProduct"
         bottom: "pool2_b_p"
         top: "ip3_b_p"
-        inner_product_param {
-                num_output: 256
-        }
+        param {
+    		lr_mult: 1
+	}
+  	param {
+    		lr_mult: 2
+  	}
+  	inner_product_param {
+    		num_output: 256
+    		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+		      type: "constant"
+		}
+
+  	}
 }
 layer{
 	name: "relu3_a"
@@ -348,45 +425,110 @@ layer{
 	type: "InnerProduct"
 	bottom: "ip3_a"
 	top: "ip4_a"
-	inner_product_param {
-		num_output: 16 # descriptor size
+	param {
+    		lr_mult: 1
 	}
+  	param {
+    		lr_mult: 2
+  	}
+  	inner_product_param {
+    		num_output: 16
+    		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+		      type: "constant"
+		}
+
+  	}
 }
 layer{
         name: "ip4_b"
         type: "InnerProduct"
         bottom: "ip3_b"
         top: "ip4_b"
-        inner_product_param {
-                num_output: 16 # descriptor size
-        }
+        param {
+    		lr_mult: 1
+	}
+  	param {
+    		lr_mult: 2
+  	}
+  	inner_product_param {
+    		num_output: 16
+    		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+		      type: "constant"
+		}
+
+  	}
 }
 layer{
         name: "ip4_c"
         type: "InnerProduct"
         bottom: "ip3_c"
         top: "ip4_c"
-        inner_product_param {
-                num_output: 16 # descriptor size
-        }
+        param {
+    		lr_mult: 1
+	}
+  	param {
+    		lr_mult: 2
+  	}
+  	inner_product_param {
+    		num_output: 16
+    		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+		      type: "constant"
+		}
+
+  	}
 }
 layer{
 	name: "ip4_a_p"
 	type: "InnerProduct"
 	bottom: "ip3_a_p"
 	top: "ip4_a_p"
-	inner_product_param {
-		num_output: 16 # descriptor size
+	param {
+    		lr_mult: 1
 	}
+  	param {
+    		lr_mult: 2
+  	}
+  	inner_product_param {
+    		num_output: 16
+    		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+		      type: "constant"
+		}
+
+  	}
 }
 layer{
         name: "ip4_b_p"
         type: "InnerProduct"
         bottom: "ip3_b_p"
         top: "ip4_b_p"
-        inner_product_param {
-                num_output: 16 # descriptor size
-        }
+        param {
+    		lr_mult: 1
+	}
+  	param {
+    		lr_mult: 2
+  	}
+  	inner_product_param {
+    		num_output: 16
+    		weight_filler {
+      			type: "xavier"
+    		}
+    		bias_filler {
+		      type: "constant"
+		}
+
+  	}
 }
 layer {
 	name: "loss"
