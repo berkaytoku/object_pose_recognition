@@ -115,16 +115,16 @@ __global__ void CLLBackward(const int count, const int channels, int bottom_inde
 			if(sqrt(xixk_dist_sq_[n]) / (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)) < 1){
 				//gradient of loss equation
 				if(bottom_index == 0){ //dLoss/dxi
-					bottom_diff[i] = -((xixk_diff_[i]/sqrt(xixk_dist_sq_[n])) * (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)) - (sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / xixj_dist_sq_[n])));
+					bottom_diff[i] = -((xixk_diff_[i]/sqrt(xixk_dist_sq_[n] + Dtype(1e-2))) * (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)) - (sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / (xixj_dist_sq_[n] + Dtype(1e-2)))));
 					bottom_diff[i] /= powf(sqrt(xixj_dist_sq_[n]) + Dtype(1e-2), 2);
 					//printf("dLoss/dxi = %f \n", bottom_diff[i]);
 				}
 				else if (bottom_index == 1){ //dLoss/dxj
-					bottom_diff[i] = sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / sqrt(xixj_dist_sq_[n]));
+					bottom_diff[i] = sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / sqrt(xixj_dist_sq_[n] + Dtype(1e-2)));
 					bottom_diff[i] /= powf(sqrt(xixj_dist_sq_[n]) + Dtype(1e-2), 2);
 				}			
 				else if (bottom_index == 2){ //dLoss/dxk
-					bottom_diff[i] = xixk_diff_[i] / sqrt(xixk_dist_sq_[n]) ;
+					bottom_diff[i] = xixk_diff_[i] / sqrt(xixk_dist_sq_[n] + Dtype(1e-2)) ;
 					bottom_diff[i] /= sqrt(xixj_dist_sq_[n]) + Dtype(1e-2);
 				}
 			}
