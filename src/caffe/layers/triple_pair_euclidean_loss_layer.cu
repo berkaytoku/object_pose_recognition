@@ -14,6 +14,13 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
   const int count = bottom[0]->count();
   vector<double> temp0, temp, pair;
   float m = 0.01;
+
+  /*
+  for (int j=0; j < 10; j++) {
+      LOG(INFO) << *(bottom[0]->cpu_data() + j);
+  }
+  */
+
   caffe_gpu_sub(
       count,
       bottom[0]->gpu_data(),  // a
@@ -135,10 +142,10 @@ __global__ void CLLBackward(const int count, const int channels, int bottom_inde
 		else if(bottom_index >= 3){ //pair 
 			//gradient of loss equation
 			if (bottom_index == 3){ //dLoss/dxi_p
-				bottom_diff[i] = 2 * xixj_diff_[i];
+				bottom_diff[i] = 2 * xixj_p_diff_[i];
 			}
 			else if (bottom_index == 4){ //dLoss/dxj_p
-				bottom_diff[i] = -(2 * xixj_diff_[i]);
+				bottom_diff[i] = -(2 * xixj_p_diff_[i]);
 			}  
 		}
 				
