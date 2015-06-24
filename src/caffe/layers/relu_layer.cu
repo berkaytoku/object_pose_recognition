@@ -20,7 +20,7 @@ void ReLULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
   /*
   LOG(INFO) << this->layer_param_.name();
-  for (int j=0; j < 0; j++) {
+  for (int j=0; j < 10; j++) {
     LOG(INFO) << *(bottom[0]->cpu_data() + j);
   }
   */

@@ -74,8 +74,8 @@ layer{
     	}
 	convolution_param {
 		num_output: 16
-		kernel_size: 8
-		stride: 2
+		kernel_size: 9
+		stride: 1
 		weight_filler {
       			type: "xavier"
     		}
@@ -126,6 +126,7 @@ layer{
 	pooling_param {
 		pool: MAX
 		kernel_size: 2
+		stride : 2
 	}	
 }
 layer{
@@ -136,6 +137,7 @@ layer{
 	pooling_param {
 		pool: MAX
 		kernel_size: 2
+		stride : 2
 	}	
 }
 layer{
@@ -146,6 +148,7 @@ layer{
 	pooling_param {
 		pool: MAX
 		kernel_size: 2
+		stride : 2
 	}	
 }
 layer{
@@ -156,6 +159,7 @@ layer{
 	pooling_param {
 		pool: MAX
 		kernel_size: 2
+		stride : 2
 	}	
 }
 layer{
@@ -166,6 +170,7 @@ layer{
 	pooling_param {
 		pool: MAX
 		kernel_size: 2
+		stride : 2
 	}	
 }
 layer{
@@ -190,8 +195,7 @@ layer{
 	convolution_param {
 		num_output: 7
 		kernel_size: 5
-		pad: 1
-		stride: 2
+		stride: 1
 		weight_filler {
       			type: "xavier"
     		}
@@ -238,6 +242,7 @@ layer{
 	pooling_param {
 		pool: MAX
 		kernel_size: 2
+		stride : 2
 	}	
 }
 layer{
@@ -248,6 +253,7 @@ layer{
 	pooling_param {
 		pool: MAX
 		kernel_size: 2
+		stride : 2
 	}	
 }
 layer{
@@ -258,6 +264,7 @@ layer{
 	pooling_param {
 		pool: MAX
 		kernel_size: 2
+		stride : 2
 	}	
 }
 layer{
@@ -268,6 +275,7 @@ layer{
 	pooling_param {
 		pool: MAX
 		kernel_size: 2
+		stride : 2
 	}	
 }
 layer{
@@ -278,27 +286,30 @@ layer{
 	pooling_param {
 		pool: MAX
 		kernel_size: 2
+		stride : 2
 	}	
 }
 layer{
-	name: "ip3_a"
-	type: "InnerProduct"
-	bottom: "pool2_a"
-	top: "ip3_a"
-	param {
+		name: "ip3_a"
+		type: "InnerProduct"
+		bottom: "pool2_a"
+		top: "ip3_a"
+		param {
+			name: "ip3_w"
     		lr_mult: 1
-	}
-  	param {
-    		lr_mult: 2
-  	}
-  	inner_product_param {
-    		num_output: 256
-    		weight_filler {
-      			type: "xavier"
-    		}
-    		bias_filler {
-		      type: "constant"
 		}
+		param {
+				name: "ip3_bi"
+				lr_mult: 2
+		}
+		inner_product_param {
+				num_output: 256
+				weight_filler {
+					type: "xavier"
+				}
+				bias_filler {
+				  type: "constant"
+			}
 
   	}
 }
@@ -307,20 +318,22 @@ layer{
         type: "InnerProduct"
         bottom: "pool2_b"
         top: "ip3_b"
-        param {
+		param {
+			name: "ip3_w"
     		lr_mult: 1
-	}
-  	param {
-    		lr_mult: 2
-  	}
-  	inner_product_param {
-    		num_output: 256
-    		weight_filler {
-      			type: "xavier"
-    		}
-    		bias_filler {
-		      type: "constant"
 		}
+		param {
+				name: "ip3_bi"
+				lr_mult: 2
+		}
+		inner_product_param {
+				num_output: 256
+				weight_filler {
+					type: "xavier"
+				}
+				bias_filler {
+				  type: "constant"
+			}
 
   	}
 }
@@ -330,11 +343,13 @@ layer{
         bottom: "pool2_c"
         top: "ip3_c"
         param {
+			name: "ip3_w"
     		lr_mult: 1
-	}
-  	param {
-    		lr_mult: 2
-  	}
+		}
+		param {
+				name: "ip3_bi"
+				lr_mult: 2
+		}
   	inner_product_param {
     		num_output: 256
     		weight_filler {
@@ -352,11 +367,13 @@ layer{
 	bottom: "pool2_a_p"
 	top: "ip3_a_p"
 	param {
+			name: "ip3_w"
     		lr_mult: 1
-	}
-  	param {
-    		lr_mult: 2
-  	}
+		}
+		param {
+				name: "ip3_bi"
+				lr_mult: 2
+		}
   	inner_product_param {
     		num_output: 256
     		weight_filler {
@@ -374,11 +391,13 @@ layer{
         bottom: "pool2_b_p"
         top: "ip3_b_p"
         param {
+			name: "ip3_w"
     		lr_mult: 1
-	}
-  	param {
-    		lr_mult: 2
-  	}
+		}
+		param {
+				name: "ip3_bi"
+				lr_mult: 2
+		}
   	inner_product_param {
     		num_output: 256
     		weight_filler {
@@ -426,11 +445,13 @@ layer{
 	bottom: "ip3_a"
 	top: "ip4_a"
 	param {
-    		lr_mult: 1
+		name: "ip4_w"
+    	lr_mult: 1
 	}
-  	param {
-    		lr_mult: 2
-  	}
+	param {
+		name: "ip4_bi"
+		lr_mult: 2
+	}
   	inner_product_param {
     		num_output: 16
     		weight_filler {
@@ -448,11 +469,13 @@ layer{
         bottom: "ip3_b"
         top: "ip4_b"
         param {
-    		lr_mult: 1
-	}
-  	param {
-    		lr_mult: 2
-  	}
+		name: "ip4_w"
+    	lr_mult: 1
+		}
+		param {
+			name: "ip4_bi"
+			lr_mult: 2
+		}
   	inner_product_param {
     		num_output: 16
     		weight_filler {
@@ -470,11 +493,13 @@ layer{
         bottom: "ip3_c"
         top: "ip4_c"
         param {
-    		lr_mult: 1
-	}
-  	param {
-    		lr_mult: 2
-  	}
+		name: "ip4_w"
+    	lr_mult: 1
+		}
+		param {
+			name: "ip4_bi"
+			lr_mult: 2
+		}
   	inner_product_param {
     		num_output: 16
     		weight_filler {
@@ -492,11 +517,13 @@ layer{
 	bottom: "ip3_a_p"
 	top: "ip4_a_p"
 	param {
-    		lr_mult: 1
+		name: "ip4_w"
+    	lr_mult: 1
 	}
-  	param {
-    		lr_mult: 2
-  	}
+	param {
+		name: "ip4_bi"
+		lr_mult: 2
+	}
   	inner_product_param {
     		num_output: 16
     		weight_filler {
@@ -513,12 +540,14 @@ layer{
         type: "InnerProduct"
         bottom: "ip3_b_p"
         top: "ip4_b_p"
-        param {
-    		lr_mult: 1
+	param {
+		name: "ip4_w"
+    	lr_mult: 1
 	}
-  	param {
-    		lr_mult: 2
-  	}
+	param {
+		name: "ip4_bi"
+		lr_mult: 2
+	}
   	inner_product_param {
     		num_output: 16
     		weight_filler {

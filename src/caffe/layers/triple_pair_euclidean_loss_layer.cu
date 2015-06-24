@@ -109,6 +109,7 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
   loss += denomForPair;
   //printf("Loss = %f \n", loss);
   //loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);
+  //printf("Forward loss: %f \n", loss);
   top[0]->mutable_cpu_data()[0] = loss;
 }
 
@@ -116,13 +117,18 @@ template <typename Dtype>
 __global__ void CLLBackward(const int count, const int channels, int bottom_index,
     Dtype *bottom_diff, const Dtype *xixj_diff_, const Dtype *xixk_diff_, const Dtype *xixj_p_diff_, const Dtype *xixj_dist_sq_, const Dtype *xixk_dist_sq_) {
   CUDA_KERNEL_LOOP(i, count) {
-    int n = i / channels;  // the num index, to access y and dist_sq
+	//printf("bottom_index = %f \n", bottom_index);
+	//printf("channel = %f \n", channels);
+    
+	int n = i / channels;  // the num index, to access y and dist_sq
 		if(bottom_index < 3){ //triple
 			//derivative of max function
+			//printf("Loss = %f \n", 1-(sqrt(xixk_dist_sq_[n]) / (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2))));
+			//LOG(INFO) << "Loss : " << 1-(sqrt(xixk_dist_sq_[n]) / (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)));
 			if(sqrt(xixk_dist_sq_[n]) / (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)) < 1){
 				//gradient of loss equation
 				if(bottom_index == 0){ //dLoss/dxi
-					bottom_diff[i] = -((xixk_diff_[i]/sqrt(xixk_dist_sq_[n] + Dtype(1e-2))) * (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)) - (sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / (xixj_dist_sq_[n] + Dtype(1e-2)))));
+					bottom_diff[i] = -((xixk_diff_[i]/sqrt(xixk_dist_sq_[n] + Dtype(1e-2))) * (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)) - (sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)))));
 					bottom_diff[i] /= powf(sqrt(xixj_dist_sq_[n]) + Dtype(1e-2), 2);
 					//printf("dLoss/dxi = %f \n", bottom_diff[i]);
 				}
@@ -166,7 +172,10 @@ void TriplePairEuclideanLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*
 		  xixj_diff_.gpu_data(), xixk_diff_.gpu_data(), xixj_p_diff_.gpu_data(),
 		  xixj_dist_sq_.gpu_data(), xixk_dist_sq_.gpu_data());
 		  CUDA_POST_KERNEL_CHECK;
+		  //LOG(INFO) << channels<< "   bindex: " << i;
 	  }
+	  
+	  
     }
 }
 
