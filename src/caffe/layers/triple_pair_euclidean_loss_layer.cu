@@ -127,7 +127,7 @@ __global__ void CLLBackward(const int count, const int channels, int bottom_inde
 					//printf("dLoss/dxi = %f \n", bottom_diff[i]);
 				}
 				else if (bottom_index == 1){ //dLoss/dxj
-					bottom_diff[i] = sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / sqrt(xixj_dist_sq_[n] + Dtype(1e-2)));
+					bottom_diff[i] = -(sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / sqrt(xixj_dist_sq_[n] + Dtype(1e-2))));
 					bottom_diff[i] /= powf(sqrt(xixj_dist_sq_[n]) + Dtype(1e-2), 2);
 				}			
 				else if (bottom_index == 2){ //dLoss/dxk
