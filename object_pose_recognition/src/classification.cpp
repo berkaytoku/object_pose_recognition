@@ -7,29 +7,27 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <fstream>
 
 #define SOURCE_FOLDER "./object_pose_recognition/"
 #define MODEL_FILE SOURCE_FOLDER "model/deploy.prototxt"
-#define TRAINED_FILE "./models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel"
-#define MEAN_FILE SOURCE_FOLDER "data/imagenet_mean.binaryproto"
-#define LABEL_FILE SOURCE_FOLDER "data/synset_words.txt"
-#define TEST_IMAGE SOURCE_FOLDER "data/cat.jpg"
+#define TRAINED_FILE SOURCE_FOLDER "./model/caffenet_train_iter_500.caffemodel"
+#define MEAN_FILE SOURCE_FOLDER "data/oprnew_mean.binaryproto"
+#define IMAGE_FILES SOURCE_FOLDER "data/desc_image_files.txt"
 
 using namespace caffe;  // NOLINT(build/namespaces)
 using std::string;
-
-/* Pair (label, confidence) representing a prediction. */
-typedef std::pair<string, float> Prediction;
 
 class Classifier {
  public:
   Classifier(const string& model_file,
              const string& trained_file,
              const string& mean_file,
-             const string& label_file);
+             const string& image_files);
 
-  std::vector<Prediction> Classify(const cv::Mat& img, int N = 5);
+  std::vector<float> Classify(const cv::Mat& img);
 
+  std::vector<string> imagedata_;
  private:
   void SetMean(const string& mean_file);
 
@@ -45,13 +43,12 @@ class Classifier {
   cv::Size input_geometry_;
   int num_channels_;
   cv::Mat mean_;
-  std::vector<string> labels_;
 };
 
 Classifier::Classifier(const string& model_file,
                        const string& trained_file,
                        const string& mean_file,
-                       const string& label_file) {
+                       const string& image_files) {
 #ifdef CPU_ONLY
   Caffe::set_mode(Caffe::CPU);
 #else
@@ -73,49 +70,19 @@ Classifier::Classifier(const string& model_file,
 
   /* Load the binaryproto mean file. */
   SetMean(mean_file);
-
+    
   /* Load labels. */
-  std::ifstream labels(label_file.c_str());
-  CHECK(labels) << "Unable to open labels file " << label_file;
+  std::ifstream imagefiles(image_files.c_str());
+  CHECK(imagefiles) << "Unable to open image file " << image_files;
   string line;
-  while (std::getline(labels, line))
-    labels_.push_back(string(line));
-
-  Blob<float>* output_layer = net_->output_blobs()[0];
-  CHECK_EQ(labels_.size(), output_layer->channels())
-    << "Number of labels is different from the output layer dimension.";
-}
-
-static bool PairCompare(const std::pair<float, int>& lhs,
-                        const std::pair<float, int>& rhs) {
-  return lhs.first > rhs.first;
-}
-
-/* Return the indices of the top N values of vector v. */
-static std::vector<int> Argmax(const std::vector<float>& v, int N) {
-  std::vector<std::pair<float, int> > pairs;
-  for (size_t i = 0; i < v.size(); ++i)
-    pairs.push_back(std::make_pair(v[i], i));
-  std::partial_sort(pairs.begin(), pairs.begin() + N, pairs.end(), PairCompare);
-
-  std::vector<int> result;
-  for (int i = 0; i < N; ++i)
-    result.push_back(pairs[i].second);
-  return result;
+  while (std::getline(imagefiles, line))
+      imagedata_.push_back(string(line));
 }
 
 /* Return the top N predictions. */
-std::vector<Prediction> Classifier::Classify(const cv::Mat& img, int N) {
-  std::vector<float> output = Predict(img);
-
-  std::vector<int> maxN = Argmax(output, N);
-  std::vector<Prediction> predictions;
-  for (int i = 0; i < N; ++i) {
-    int idx = maxN[i];
-    predictions.push_back(std::make_pair(labels_[idx], output[idx]));
-  }
-
-  return predictions;
+std::vector<float> Classifier::Classify(const cv::Mat& img) {
+    std::vector<float> output = Predict(img);
+    return output;
 }
 
 /* Load the mean file in binaryproto format. */
@@ -234,22 +201,29 @@ int main(int argc, char** argv) {
   string model_file   = MODEL_FILE;
   string trained_file = TRAINED_FILE;
   string mean_file    = MEAN_FILE;
-  string label_file   = LABEL_FILE;
-  Classifier classifier(model_file, trained_file, mean_file, label_file);
+  string image_files  = IMAGE_FILES;
+  Classifier classifier(model_file, trained_file, mean_file, image_files);
 
-  string file = TEST_IMAGE;
-
-  std::cout << "---------- Prediction for "
-            << file << " ----------" << std::endl;
-
-  cv::Mat img = cv::imread(file, -1);
-  CHECK(!img.empty()) << "Unable to decode image " << file;
-  std::vector<Prediction> predictions = classifier.Classify(img);
-
-  /* Print the top N predictions. */
-  for (size_t i = 0; i < predictions.size(); ++i) {
-    Prediction p = predictions[i];
-    std::cout << std::fixed << std::setprecision(4) << p.second << " - \""
-              << p.first << "\"" << std::endl;
-  }
+    std::ofstream outputFile;
+    outputFile.open("./object_pose_recognition/data/descriptors.txt", std::ofstream::out | std::ofstream::trunc);
+    
+    for (int i=0; i < classifier.imagedata_.size(); i++) {
+        string line = classifier.imagedata_.at(i);
+        string path = line.substr(0, line.find(" "));
+        string file = path;
+        
+        cv::Mat img = cv::imread(file, -1);
+        CHECK(!img.empty()) << "Unable to decode image " << file;
+        std::vector<float> predictions = classifier.Classify(img);
+        
+        outputFile << line;
+        /* Print the top N predictions. */
+        for (size_t i = 0; i < predictions.size(); ++i) {
+            float p = predictions[i];
+            outputFile << " " << std::setprecision(6) << p;
+        }
+        outputFile << std::endl;
+    }
+    
+    outputFile.close();
 }
