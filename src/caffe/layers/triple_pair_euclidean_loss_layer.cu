@@ -12,8 +12,6 @@ template <typename Dtype>
 void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   const int count = bottom[0]->count();
-  vector<double> temp0, temp, pair;
-  float m = 0.01;
 
   /*
   for (int j=0; j < 10; j++) {
@@ -40,82 +38,62 @@ void TriplePairEuclideanLossLayer<Dtype>::Forward_gpu(
       summer_vec_.gpu_data(),
       Dtype(0.0),
       xixj_dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
-  Dtype margin = this->layer_param_.contrastive_loss_param().margin();
-  bool legacy_version =
-      this->layer_param_.contrastive_loss_param().legacy_version();
+
+    caffe_gpu_sub(
+        count,
+        bottom[0]->gpu_data(),  // a
+        bottom[2]->gpu_data(),  // b
+        xixk_diff_.mutable_gpu_data());  // a_i-b_i
+
+    caffe_gpu_powx(
+        count,
+        xixk_diff_.mutable_gpu_data(),  // a_i-b_i
+        Dtype(2),
+        diff_sq_.mutable_gpu_data());
+
+    caffe_gpu_gemv(
+        CblasNoTrans,
+        bottom[0]->num(),
+        bottom[0]->channels(),
+        Dtype(1.0),
+        diff_sq_.gpu_data(),  // (a_i-b_i)^2
+        summer_vec_.gpu_data(),
+        Dtype(0.0),
+        xixk_dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
+
+    caffe_gpu_sub(
+        count,
+        bottom[3]->gpu_data(),  // a
+        bottom[4]->gpu_data(),  // b
+        xixj_p_diff_.mutable_gpu_data());  // a_i-b_i
+    caffe_gpu_powx(
+        count,
+        xixj_p_diff_.mutable_gpu_data(),  // a_i-b_i
+        Dtype(2),
+        diff_sq_.mutable_gpu_data());
+    caffe_gpu_gemv(
+        CblasNoTrans,
+        bottom[0]->num(),
+        bottom[0]->channels(),
+        Dtype(1.0),
+        diff_sq_.gpu_data(),  // (a_i-b_i)^2
+        summer_vec_.gpu_data(),
+        Dtype(0.0),
+        xixj_p_dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
+
   Dtype loss(0.0);
-  
-  double tempDenominator = 0.0;
-  
   for (int i = 0; i < bottom[0]->num(); ++i) {
-      tempDenominator += diff_sq_.cpu_data()[i];
+        loss += std::max(Dtype(0.0), static_cast<Dtype>(1-(sqrt(xixk_dist_sq_.cpu_data()[i])/(sqrt(xixj_dist_sq_.cpu_data()[i]) + Dtype(1e-2)))));
+        loss += xixj_p_dist_sq_.cpu_data()[i];
   }
 
-  tempDenominator = sqrt(tempDenominator) + m;
 
-  caffe_gpu_sub(
-      count,
-      bottom[0]->gpu_data(),  // a
-      bottom[2]->gpu_data(),  // b
-      xixk_diff_.mutable_gpu_data());  // a_i-b_i
-
-  caffe_gpu_powx(
-      count,
-      xixk_diff_.mutable_gpu_data(),  // a_i-b_i
-      Dtype(2),
-      diff_sq_.mutable_gpu_data());
-  caffe_gpu_gemv(
-      CblasNoTrans,
-      bottom[0]->num(),
-      bottom[0]->channels(),
-      Dtype(1.0),
-      diff_sq_.gpu_data(),  // (a_i-b_i)^2
-      summer_vec_.gpu_data(),
-      Dtype(0.0),
-      xixk_dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
-  
-  double tempNumerator = 0.0;
-  for(int j=0; j<bottom[0]->num(); j++) {
-	tempNumerator += diff_sq_.mutable_cpu_data()[j];  	
-  }
-
-  tempNumerator = sqrt(tempNumerator);
-  Dtype dist = std::max(1-(tempNumerator/tempDenominator), 0.0);
-  loss += dist;
-  
-  caffe_gpu_sub(
-      count,
-      bottom[3]->gpu_data(),  // a
-      bottom[4]->gpu_data(),  // b
-      xixj_p_diff_.mutable_gpu_data());  // a_i-b_i
-  caffe_gpu_powx(
-      count,
-      diff_.mutable_gpu_data(),  // a_i-b_i
-      Dtype(2),
-      diff_sq_.mutable_gpu_data());
-  caffe_gpu_gemv(
-      CblasNoTrans,
-      bottom[0]->num(),
-      bottom[0]->channels(),
-      Dtype(1.0),
-      diff_sq_.gpu_data(),  // (a_i-b_i)^2
-      summer_vec_.gpu_data(),
-      Dtype(0.0),
-      xixj_p_dist_sq_.mutable_gpu_data());  // \Sum (a_i-b_i)^2
-  double denomForPair = 0.0;
-  for(int k=0; k<bottom[0]->num(); k++) {
-	denomForPair += diff_sq_.mutable_cpu_data()[k];  	
-  }
-  loss += denomForPair;
-  //printf("Loss = %f \n", loss);
-  //loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);
-  //printf("Forward loss: %f \n", loss);
-  top[0]->mutable_cpu_data()[0] = loss;
+    top[0]->mutable_cpu_data()[0] = loss / static_cast<Dtype>(bottom[0]->num());
 }
 
 template <typename Dtype>
 __global__ void CLLBackward(const int count, const int channels, int bottom_index,
-    Dtype *bottom_diff, const Dtype *xixj_diff_, const Dtype *xixk_diff_, const Dtype *xixj_p_diff_, const Dtype *xixj_dist_sq_, const Dtype *xixk_dist_sq_) {
+    Dtype *bottom_diff, const Dtype *xixj_diff_, const Dtype *xixk_diff_, const Dtype *xixj_p_diff_, const Dtype *xixj_dist_sq_, const Dtype *xixk_dist_sq_, const Dtype alpha) {
   CUDA_KERNEL_LOOP(i, count) {
 	//printf("bottom_index = %f \n", bottom_index);
 	//printf("channel = %f \n", channels);
@@ -128,16 +106,16 @@ __global__ void CLLBackward(const int count, const int channels, int bottom_inde
 			if(sqrt(xixk_dist_sq_[n]) / (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)) < 1){
 				//gradient of loss equation
 				if(bottom_index == 0){ //dLoss/dxi
-					bottom_diff[i] = -((xixk_diff_[i]/sqrt(xixk_dist_sq_[n] + Dtype(1e-2))) * (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)) - (sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)))));
+					bottom_diff[i] = -((xixk_diff_[i]/(sqrt(xixk_dist_sq_[n]) + Dtype(1e-3))) * (sqrt(xixj_dist_sq_[n]) + Dtype(1e-2)) - (sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / (sqrt(xixj_dist_sq_[n]) + Dtype(1e-3)))));
 					bottom_diff[i] /= powf(sqrt(xixj_dist_sq_[n]) + Dtype(1e-2), 2);
 					//printf("dLoss/dxi = %f \n", bottom_diff[i]);
 				}
 				else if (bottom_index == 1){ //dLoss/dxj
-					bottom_diff[i] = -(sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / sqrt(xixj_dist_sq_[n] + Dtype(1e-2))));
+					bottom_diff[i] = -(sqrt(xixk_dist_sq_[n]) * (xixj_diff_[i] / (sqrt(xixj_dist_sq_[n]) + Dtype(1e-3))));
 					bottom_diff[i] /= powf(sqrt(xixj_dist_sq_[n]) + Dtype(1e-2), 2);
 				}			
 				else if (bottom_index == 2){ //dLoss/dxk
-					bottom_diff[i] = xixk_diff_[i] / sqrt(xixk_dist_sq_[n] + Dtype(1e-2)) ;
+					bottom_diff[i] = xixk_diff_[i] / (sqrt(xixk_dist_sq_[n]) + Dtype(1e-3)) ;
 					bottom_diff[i] /= sqrt(xixj_dist_sq_[n]) + Dtype(1e-2);
 				}
 			}
@@ -154,7 +132,7 @@ __global__ void CLLBackward(const int count, const int channels, int bottom_inde
 				bottom_diff[i] = -(2 * xixj_p_diff_[i]);
 			}  
 		}
-				
+bottom_diff[i] *= alpha;
   }
 }
 
@@ -162,15 +140,14 @@ template <typename Dtype>
 void TriplePairEuclideanLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
 	for(int i = 0; i < 5; ++i){
-	  Dtype* bout = bottom[i]->mutable_cpu_diff();
-	  //int num = bottom[i]->num();
-	  int count = bottom[i]->count();
-	  int channels = bottom[i]->channels();
 	   if (propagate_down[i]) {
+            int count = bottom[0]->count();
+            int channels = bottom[0]->channels();
+          const Dtype alpha = top[0]->cpu_diff()[0] / static_cast<Dtype>(bottom[0]->num());
 		  CLLBackward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
 		  count, channels, i, bottom[i]->mutable_gpu_diff(), 
 		  xixj_diff_.gpu_data(), xixk_diff_.gpu_data(), xixj_p_diff_.gpu_data(),
-		  xixj_dist_sq_.gpu_data(), xixk_dist_sq_.gpu_data());
+		  xixj_dist_sq_.gpu_data(), xixk_dist_sq_.gpu_data(), alpha);
 		  CUDA_POST_KERNEL_CHECK;
 		  //LOG(INFO) << channels<< "   bindex: " << i;
 	  }
