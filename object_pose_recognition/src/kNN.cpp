@@ -1,0 +1,305 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+#include <ctime>
+#include <fstream>
+#include <cmath>
+
+using namespace std;
+
+char trainingDescriptorsFile[150] = "./object_pose_recognition/data/descriptors.txt";
+char testDescriptorsFile[150] = "./object_pose_recognition/data/descriptors_test.txt";
+
+
+// DataModel class
+class DataModel {
+	
+	private:
+		string location;
+		int classLabel;
+		int curve;
+		int rot;
+		vector<float> descriptorVect;
+	
+	public: 
+		DataModel(string sLocation, int sClassLabel, int sCurve, int sRot, vector<float> sDescriptorVect) {
+			location = sLocation;
+			classLabel = sClassLabel;
+			curve = sCurve;
+			rot = sRot;
+			descriptorVect = sDescriptorVect;
+		}
+		DataModel() {
+		}
+		void setLocation(string sLocation) {
+			this->location = sLocation;
+		}
+		string getLocation() {
+			return this->location;
+		}
+		
+		void setClassLabel(int sClassLabel) {
+			this->classLabel = sClassLabel;
+		}
+		int getClassLabel() {
+			return this->classLabel;
+		}
+		
+		void setCurve(int sCurve) {
+			this->curve = sCurve;
+		}
+		int getCurve() {
+			return this->curve;
+		}
+		
+		void setRot(int sRot) {
+			this->rot = sRot;
+		}
+		int getRot() {
+			return this->rot;
+		}
+		
+		void setDescriptorVect(vector<float> sVect) {
+			this->descriptorVect = sVect;
+		}
+		vector<float> getDescriptorVect() {
+			return this->descriptorVect;
+		}
+	
+};
+
+// Model class for difference
+class Difference {
+      public:
+	int classLabel;
+	int curve;
+	int rot;
+	float euclideanDist;
+	Difference(int pClassLabel, int pCurve, int pRot, float pEDistance) {
+	  classLabel = pClassLabel;
+	  curve = pCurve;
+	  rot = pRot;
+	  euclideanDist = pEDistance;
+	}
+};
+
+vector<DataModel> trainingDescriptorsVect;
+vector<DataModel> testingDescriptorsVect;
+
+
+// Read training data
+void readTrainingDescriptorInformation() {
+	
+	string line;
+	ifstream myReadFile;
+	myReadFile.open(trainingDescriptorsFile);
+	int z = 1;
+	int counter = 0;
+	char output[250];
+	 if (myReadFile.is_open()) {
+		string location;
+		int classLabel;
+		int curve;
+		int rot;
+		vector<float> descriptor;
+		
+		while (!myReadFile.eof()) {
+			myReadFile >> output;
+			
+			if(z==21) {
+				DataModel *temp = new DataModel(location, classLabel, curve, rot, descriptor);
+				trainingDescriptorsVect.push_back(*temp);
+				/*
+				cout<<"Location: "<<temp->getLocation()<<endl;
+				cout<<"Class Label: "<<temp->getClassLabel()<<endl;
+				cout<<"Curve: "<<temp->getCurve()<<endl;
+				cout<<"Rot: "<<temp->getRot()<<endl;
+				for(int t=0; t<descriptor.size(); t++)
+				  cout<<"Descriptor element: "<<descriptor.at(t)<<endl;
+				*/
+				descriptor.clear();
+				z=1;
+			}
+			
+			if(myReadFile.eof())
+				break;
+
+			if(z == 1) {
+				location = output;
+				//cout<<"Location: "<<location<<endl;
+				counter++;
+			}
+			else if(z == 2) {
+				sscanf(output, "%d", &classLabel);
+				//cout<<"ClassLabel: "<<classLabel<<endl;
+			}
+			else if(z == 3) {
+				sscanf(output, "%d", &curve);
+				//cout<<"Curve: "<<curve<<endl;
+			}
+			else if(z == 4) {
+				sscanf(output, "%d", &rot);
+				//cout<<"Rot: "<<rot<<endl;
+			}
+			else if (z>4 && z<21) {
+				float temp;
+				sscanf(output, "%f", &temp);
+				//cout<<"Temp: "<<temp<<endl;
+				descriptor.push_back(temp);
+			}
+			z++;
+			//cout<<output<<endl<<endl;
+		}
+	}
+	myReadFile.close();
+	
+	/*
+	for(int y=0; y<trainingDescriptorsVect.size(); y++) {
+	    cout<<"Location: "<<trainingDescriptorsVect.at(y).getLocation()<<endl;
+	    cout<<"Class Label: "<<trainingDescriptorsVect.at(y).getClassLabel()<<endl;
+	    cout<<"Curve: "<<trainingDescriptorsVect.at(y).getCurve()<<endl;
+	    cout<<"Rot:"<<trainingDescriptorsVect.at(y).getRot()<<endl;
+	    for(int r=0; r<trainingDescriptorsVect.at(y).getDescriptorVect().size(); r++) {
+		  cout<<"Descriptor Element: "<<trainingDescriptorsVect.at(y).getDescriptorVect().at(r)<<endl;
+	    }
+	}
+	*/
+
+	//cout<<trainingDescriptorsVect.size()<<endl;
+
+}
+
+// Read testing data
+void readTestingDescriptorInformation() {
+	
+	string line;
+	ifstream myReadFile;
+	myReadFile.open(testDescriptorsFile);
+	int z = 1;
+	int counter = 0;
+	char output[250];
+	 if (myReadFile.is_open()) {
+		string location;
+		int classLabel;
+		int curve;
+		int rot;
+		vector<float> descriptor;
+		
+		while (!myReadFile.eof()) {
+			myReadFile >> output;
+			
+			if(z==21) {
+				DataModel *temp = new DataModel(location, classLabel, curve, rot, descriptor);
+				testingDescriptorsVect.push_back(*temp);
+				/*
+				cout<<"Location: "<<temp->getLocation()<<endl;
+				cout<<"Class Label: "<<temp->getClassLabel()<<endl;
+				cout<<"Curve: "<<temp->getCurve()<<endl;
+				cout<<"Rot: "<<temp->getRot()<<endl;
+				for(int t=0; t<descriptor.size(); t++)
+				  cout<<"Descriptor element: "<<descriptor.at(t)<<endl;
+				*/
+				descriptor.clear();
+				z=1;
+			}
+			
+			if(myReadFile.eof())
+				break;
+
+			if(z == 1) {
+				location = output;
+				//cout<<"Location: "<<location<<endl;
+				counter++;
+			}
+			else if(z == 2) {
+				sscanf(output, "%d", &classLabel);
+				//cout<<"ClassLabel: "<<classLabel<<endl;
+			}
+			else if(z == 3) {
+				sscanf(output, "%d", &curve);
+				//cout<<"Curve: "<<curve<<endl;
+			}
+			else if(z == 4) {
+				sscanf(output, "%d", &rot);
+				//cout<<"Rot: "<<rot<<endl;
+			}
+			else if (z>4 && z<21) {
+				float temp;
+				sscanf(output, "%f", &temp);
+				//cout<<"Temp: "<<temp<<endl;
+				descriptor.push_back(temp);
+			}
+			z++;
+			//cout<<output<<endl<<endl;
+		}
+	}
+	myReadFile.close();
+	
+	/*
+	for(int y=0; y<testingDescriptorsVect.size(); y++) {
+	    cout<<"Location: "<<testingDescriptorsVect.at(y).getLocation()<<endl;
+	    cout<<"Class Label: "<<testingDescriptorsVect.at(y).getClassLabel()<<endl;
+	    cout<<"Curve: "<<testingDescriptorsVect.at(y).getCurve()<<endl;
+	    cout<<"Rot:"<<testingDescriptorsVect.at(y).getRot()<<endl;
+	    for(int r=0; r<testingDescriptorsVect.at(y).getDescriptorVect().size(); r++) {
+		  cout<<"Descriptor Element: "<<testingDescriptorsVect.at(y).getDescriptorVect().at(r)<<endl;
+	    }
+	}
+	*/
+
+	//cout<<testingDescriptorsVect.size()<<endl;
+
+}
+
+// Sort Difference vector
+bool compare_by_dist(const Difference lhs, const Difference rhs) {
+    return lhs.euclideanDist < rhs.euclideanDist;
+}
+
+void knnClassify() {
+  
+    int correctClassification = 0;
+    for(int i=0; i<testingDescriptorsVect.size(); i++) {
+      vector<Difference> differenceVect;
+      differenceVect.clear();
+      
+      for(int j=0; j<trainingDescriptorsVect.size(); j++) {
+	  float dist = 0;
+	  for(int z=0; z<testingDescriptorsVect.at(i).getDescriptorVect().size(); z++) {
+	    float temp;
+	    temp = pow((testingDescriptorsVect.at(i).getDescriptorVect().at(z)-trainingDescriptorsVect.at(j).getDescriptorVect().at(z)),2);
+	    dist = dist + temp;
+	  }
+	  dist = sqrt(dist);
+	  Difference *diffTemp = new Difference(trainingDescriptorsVect.at(j).getClassLabel(), trainingDescriptorsVect.at(j).getCurve(), trainingDescriptorsVect.at(j).getRot(), dist);
+	  differenceVect.push_back(*diffTemp);
+      }
+      
+      std::sort(differenceVect.begin(), differenceVect.end(), compare_by_dist);
+      
+      // 1-NN. If you wanna increase k, simply change the max iteration num in for loop below
+      for(int p=0; p<1; p++) {
+	  if(testingDescriptorsVect.at(i).getClassLabel() == differenceVect.at(p).classLabel) {
+	      correctClassification++;
+	      break;
+	  }
+      }
+    }
+    float accuracy = (float)correctClassification/testingDescriptorsVect.size();
+    cout<<"Correct Classification: "<<correctClassification<<endl;
+    cout<<"Accuracy:"<< accuracy<<endl;
+}
+
+int main() {
+	readTrainingDescriptorInformation();
+	readTestingDescriptorInformation();
+	cout<<"Training Vect size: "<<trainingDescriptorsVect.size()<<endl;
+	cout<<"Test Vect size: "<<testingDescriptorsVect.size()<<endl;
+	knnClassify();
+	cout<<"Finished"<<endl;
+	return 0;
+}
+
