@@ -13,7 +13,6 @@ using namespace std;
 char trainingDescriptorsFile[150] = "./object_pose_recognition/data/descriptors.txt";
 char testDescriptorsFile[150] = "./object_pose_recognition/data/descriptors_test.txt";
 
-
 // DataModel class
 class DataModel {
 	
@@ -86,9 +85,23 @@ class Difference {
 	}
 };
 
+// Result class
+class Result {
+    
+    public:
+	int classLabel;
+	int frequency;
+	Result(int pClassType, int pFreq) {
+	    classLabel = pClassType;
+	    frequency = pFreq;
+	}
+	void increaseFrequency() {
+	    frequency++;
+	}
+};
+
 vector<DataModel> trainingDescriptorsVect;
 vector<DataModel> testingDescriptorsVect;
-
 
 // Read training data
 void readTrainingDescriptorInformation() {
@@ -253,13 +266,16 @@ void readTestingDescriptorInformation() {
 	//cout<<testingDescriptorsVect.size()<<endl;
 
 }
-
 // Sort Difference vector
 bool compare_by_dist(const Difference lhs, const Difference rhs) {
     return lhs.euclideanDist < rhs.euclideanDist;
 }
-
-void knnClassify() {
+// Sort Result vector
+bool compare_by_freq(const Result lhs, const Result rhs) {
+    return lhs.frequency > rhs.frequency;
+}
+// k-NN - parameter should be sent from main func
+void knnClassify(int k) {
   
     int correctClassification = 0;
     for(int i=0; i<testingDescriptorsVect.size(); i++) {
@@ -280,14 +296,60 @@ void knnClassify() {
       
       std::sort(differenceVect.begin(), differenceVect.end(), compare_by_dist);
       
-      // 1-NN. If you wanna increase k, simply change the max iteration num in for loop below
-      for(int p=0; p<1; p++) {
-	  if(testingDescriptorsVect.at(i).getClassLabel() == differenceVect.at(p).classLabel) {
-	      correctClassification++;
-	      break;
+      vector<Result> resultVect;
+      for(int h=0; h<5; h++) {
+	  Result *tempResult = new Result(h+1, 0);
+	  resultVect.push_back(*tempResult);
+      }
+      
+      //cout<<"Test label: "<<testingDescriptorsVect.at(i).getClassLabel()<<endl;
+      // 1-NN. If you wanna increase k, simply change k value which you send to function as an argument
+      for(int p=0; p<k; p++) {
+	// update the frequencies according to k'th value
+	  if(differenceVect.at(p).classLabel == 1) {
+	      resultVect.at(1-1).increaseFrequency();
+	  }
+	  else if(differenceVect.at(p).classLabel == 2) {
+	      resultVect.at(2-1).increaseFrequency();
+	  }
+	  else if(differenceVect.at(p).classLabel == 3) {
+	      resultVect.at(3-1).increaseFrequency();
+	  }
+	  else if(differenceVect.at(p).classLabel == 4) {
+	      resultVect.at(4-1).increaseFrequency();
+	  }
+	  else if(differenceVect.at(p).classLabel == 5) {
+	      resultVect.at(5-1).increaseFrequency();
 	  }
       }
+      
+      // Sort resultVect which has the occurance frequencies of classes so the top elements would be the likely classes
+      std::sort(resultVect.begin(), resultVect.end(), compare_by_freq);
+      vector<int> likelyClasses;
+      int max=0;
+      for(int u=0; u<5; u++){
+	  if(resultVect.at(u).frequency>=max) {
+	      max = resultVect.at(u).frequency;
+	      likelyClasses.push_back(resultVect.at(u).classLabel);
+	  }
+      }
+      
+      // Check whether the test is successful
+      for(int g=0; g<likelyClasses.size(); g++) {
+	   if(likelyClasses.at(g)==testingDescriptorsVect.at(i).getClassLabel()) {
+	     correctClassification++;
+	     break;
+	  }
+	     
+      }
+      /*
+      for(int p=0; p<5; p++) {
+	cout<<"Nearest elements: "<<differenceVect.at(p).classLabel<<endl;
+       }*/
+      resultVect.clear();
+      likelyClasses.clear();
     }
+    // Calculate the total accuracy of the prediction
     float accuracy = (float)correctClassification/testingDescriptorsVect.size();
     cout<<"Correct Classification: "<<correctClassification<<endl;
     cout<<"Accuracy:"<< accuracy<<endl;
@@ -298,8 +360,9 @@ int main() {
 	readTestingDescriptorInformation();
 	cout<<"Training Vect size: "<<trainingDescriptorsVect.size()<<endl;
 	cout<<"Test Vect size: "<<testingDescriptorsVect.size()<<endl;
-	knnClassify();
+	int k=2;
+	knnClassify(1);
+	cout<<k<<"-NN is applied"<<endl;
 	cout<<"Finished"<<endl;
 	return 0;
 }
-
