@@ -7,6 +7,7 @@
 #include <ctime>
 #include <fstream>
 #include <cmath>
+#include <CL/cl_platform.h>
 
 using namespace std;
 
@@ -275,9 +276,10 @@ bool compare_by_freq(const Result lhs, const Result rhs) {
     return lhs.frequency > rhs.frequency;
 }
 // k-NN - parameter should be sent from main func
-void knnClassify(int k) {
+void knnClassify(int k, int pAngleThreshold) {
   
     int correctClassification = 0;
+    int correctPoseClassification=0;
     for(int i=0; i<testingDescriptorsVect.size(); i++) {
       vector<Difference> differenceVect;
       differenceVect.clear();
@@ -334,7 +336,7 @@ void knnClassify(int k) {
 	  }
       }
       
-      // Check whether the test is successful
+      // Object recognition part
       for(int g=0; g<likelyClasses.size(); g++) {
 	   if(likelyClasses.at(g)==testingDescriptorsVect.at(i).getClassLabel()) {
 	     correctClassification++;
@@ -342,6 +344,30 @@ void knnClassify(int k) {
 	  }
 	     
       }
+      
+      // Pose estimation part
+      int curveTotal = 0;
+      int rotTotal = 0;
+      int poseEstCounter = 0;
+      
+      for(int y=0; y<likelyClasses.size(); y++) {
+	   for(int f=0; f<k; f++) {
+		if(differenceVect.at(f).classLabel == likelyClasses.at(y)) {
+		      curveTotal = curveTotal + differenceVect.at(f).curve;
+		      rotTotal = rotTotal + differenceVect.at(f).rot;
+		      poseEstCounter++;
+		}
+	  }
+      }
+      
+      float curveAvg = (float)curveTotal/poseEstCounter;
+      float rotAvg = (float)rotTotal/poseEstCounter;
+      
+      
+      if(abs(testingDescriptorsVect.at(i).getCurve()-curveAvg)<pAngleThreshold && abs(testingDescriptorsVect.at(i).getRot()-rotAvg)<pAngleThreshold) {
+	  correctPoseClassification++;
+      }
+      
       /*
       for(int p=0; p<5; p++) {
 	cout<<"Nearest elements: "<<differenceVect.at(p).classLabel<<endl;
@@ -350,9 +376,13 @@ void knnClassify(int k) {
       likelyClasses.clear();
     }
     // Calculate the total accuracy of the prediction
-    float accuracy = (float)correctClassification/testingDescriptorsVect.size();
-    cout<<"Correct Classification: "<<correctClassification<<endl;
-    cout<<"Accuracy:"<< accuracy<<endl;
+    float accuracyObjDet = (float)correctClassification/testingDescriptorsVect.size();
+    cout<<"Correct Classification: (Object Recognition) "<<correctClassification<<endl;
+    cout<<"Accuracy: (Object Recognition)"<< accuracyObjDet<<endl;
+    
+    float accuracyPoseEst = (float)correctPoseClassification/testingDescriptorsVect.size();
+    cout<<"Correct Classification: (Pose Estimation) "<<correctPoseClassification<<endl;
+    cout<<"Accuracy: (Pose Estimation)"<< accuracyPoseEst<<endl;
 }
 
 int main() {
@@ -360,8 +390,9 @@ int main() {
 	readTestingDescriptorInformation();
 	cout<<"Training Vect size: "<<trainingDescriptorsVect.size()<<endl;
 	cout<<"Test Vect size: "<<testingDescriptorsVect.size()<<endl;
-	int k=2;
-	knnClassify(1);
+	int k=1;
+	int angleThreshold = 15;
+	knnClassify(k, angleThreshold);
 	cout<<k<<"-NN is applied"<<endl;
 	cout<<"Finished"<<endl;
 	return 0;
