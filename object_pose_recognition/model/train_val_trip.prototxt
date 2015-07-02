@@ -4,14 +4,16 @@ layer {
   type: "TripleImageData"
   top: "data"
   image_data_param {
- 	source: "./object_pose_recognition/data/file_list.txt"
-    batch_size: 3
+    # source: "./object_pose_recognition/data/file_list.txt"
+    source: "./object_pose_recognition/data/trainingData_New_cvl_triple.txt"
+    batch_size: 12
     new_height: 64
     new_width: 64
   }
   transform_param {
 	scale: 0.00390625
-   # mean_file: "./object_pose_recognition/data/imagenet_mean.binaryproto"
+	mean_file: "./object_pose_recognition/data/oprnew_mean.binaryproto"
+	mirror: 1
   }
 }
 layer {
@@ -19,14 +21,16 @@ layer {
   type: "PairImageData"
   top: "data_p"
   image_data_param {
-    source: "./object_pose_recognition/data/file_list_p.txt"
-    batch_size: 3
+    # source: "./object_pose_recognition/data/file_list_p.txt"
+    source: "./object_pose_recognition/data/trainingData_New_cvl_pair.txt"
+    batch_size: 12
     new_height: 64
     new_width: 64
   }
   transform_param {
 	scale: 0.00390625
-  #  mean_file: "./object_pose_recognition/data/imagenet_mean.binaryproto"
+	mean_file: "./object_pose_recognition/data/oprnew_mean.binaryproto"
+	mirror: 1
   }
 }
 layer {
