@@ -349,19 +349,26 @@ void knnClassify(int k, int pAngleThreshold) {
       int curveTotal = 0;
       int rotTotal = 0;
       int poseEstCounter = 0;
-      
+      float weightCounter = 0;
+
       for(int y=0; y<likelyClasses.size(); y++) {
 	   for(int f=0; f<k; f++) {
 		if(differenceVect.at(f).classLabel == likelyClasses.at(y)) {
-		      curveTotal = curveTotal + differenceVect.at(f).curve;
-		      rotTotal = rotTotal + differenceVect.at(f).rot;
-		      poseEstCounter++;
+		      //curveTotal = curveTotal + differenceVect.at(f).curve;
+		      //rotTotal = rotTotal + differenceVect.at(f).rot;
+		      curveTotal = curveTotal + differenceVect.at(f).curve*1/differenceVect.at(f).euclideanDist;
+		      rotTotal = rotTotal + differenceVect.at(f).rot*1/differenceVect.at(f).euclideanDist;
+		      weightCounter = weightCounter + 1/differenceVect.at(f).euclideanDist;
+		      //poseEstCounter++;
 		}
 	  }
       }
       
-      float curveAvg = (float)curveTotal/poseEstCounter;
-      float rotAvg = (float)rotTotal/poseEstCounter;
+      //float curveAvg = (float)curveTotal/poseEstCounter;
+      //float rotAvg = (float)rotTotal/poseEstCounter;
+
+      float curveAvg = (float)curveTotal/weightCounter;
+      float rotAvg = (float)rotTotal/weightCounter;
       
       
       if(abs(testingDescriptorsVect.at(i).getCurve()-curveAvg)<pAngleThreshold && abs(testingDescriptorsVect.at(i).getRot()-rotAvg)<pAngleThreshold) {
@@ -391,7 +398,7 @@ int main() {
 	cout<<"Training Vect size: "<<trainingDescriptorsVect.size()<<endl;
 	cout<<"Test Vect size: "<<testingDescriptorsVect.size()<<endl;
 	int k=1;
-	int angleThreshold = 15;
+	int angleThreshold = 10;
 	knnClassify(k, angleThreshold);
 	cout<<k<<"-NN is applied"<<endl;
 	cout<<"Finished"<<endl;
