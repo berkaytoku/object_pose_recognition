@@ -346,8 +346,8 @@ void knnClassify(int k, int pAngleThreshold) {
       }
       
       // Pose estimation part
-      int curveTotal = 0;
-      int rotTotal = 0;
+      float curveTotal = 0;
+      float rotTotal = 0;
       int poseEstCounter = 0;
       float weightCounter = 0;
 
@@ -356,9 +356,9 @@ void knnClassify(int k, int pAngleThreshold) {
 		if(differenceVect.at(f).classLabel == likelyClasses.at(y)) {
 		      //curveTotal = curveTotal + differenceVect.at(f).curve;
 		      //rotTotal = rotTotal + differenceVect.at(f).rot;
-		      curveTotal = curveTotal + differenceVect.at(f).curve*1/differenceVect.at(f).euclideanDist;
-		      rotTotal = rotTotal + differenceVect.at(f).rot*1/differenceVect.at(f).euclideanDist;
-		      weightCounter = weightCounter + 1/differenceVect.at(f).euclideanDist;
+		      curveTotal = curveTotal + differenceVect.at(f).curve*pow((1/differenceVect.at(f).euclideanDist),15);
+		      rotTotal = rotTotal + differenceVect.at(f).rot*pow((1/differenceVect.at(f).euclideanDist),15);
+		      weightCounter = weightCounter + pow((1/differenceVect.at(f).euclideanDist),15);
 		      //poseEstCounter++;
 		}
 	  }
